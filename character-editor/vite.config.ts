@@ -1,10 +1,18 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import preact from "@preact/preset-vite";
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [preact()],
   server: {
-    port: 3000
+    port: 3000,
   },
-  publicDir: 'src/editor',
-}); 
+  publicDir: "src/editor",
+  resolve: {
+    alias: {
+      react: "preact/compat",
+      "react-dom/test-utils": "preact/test-utils",
+      "react-dom": "preact/compat",
+      "react/jsx-runtime": "preact/jsx-runtime",
+    },
+  },
+});

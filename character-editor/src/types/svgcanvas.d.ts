@@ -1,4 +1,4 @@
-declare module '*/editor/Editor.js' {
+declare module "*/editor/Editor.js" {
   interface SvgCanvas {
     getSvgString(): string;
     getMode(): string;
@@ -12,13 +12,16 @@ declare module '*/editor/Editor.js' {
     pasteElements(): void;
     deleteSelectedElements(): void;
     cutSelectedElements(): void;
-    convertToPath(elem?: Element, getBBox?: boolean): void | DOMRect | false | SVGPathElement | null;
+    convertToPath(
+      elem?: Element,
+      getBBox?: boolean,
+    ): void | DOMRect | false | SVGPathElement | null;
     randomizeIds(enableRandomization?: boolean): void;
     setBlur(elem: Element, val: number): void;
     setBlurNoUndo(elem: Element, val: number): void;
     setBlurOffsets(elem: Element, val: number): void;
     getBlur(elem: Element): string;
-    getPaintOpacity(type: 'fill' | 'stroke'): number;
+    getPaintOpacity(type: "fill" | "stroke"): number;
     setGoodImage(val: string): void;
     // Color and stroke settings
     setFillColor(color: string): void;
@@ -28,10 +31,12 @@ declare module '*/editor/Editor.js' {
     setStrokeOpacity(opacity: number): void;
     setStrokeDashArray(value: string): void;
     // Event handling
-    bind(eventName: string, callback: (data: any) => void): void;
+    bind(
+      eventName: string,
+      callback: (window: Window, data: any) => void,
+    ): void;
     unbind(eventName: string, callback: (data: any) => void): void;
     // SVG content handling
-    loadSvgString(svgString: string): void;
     addEventListener(eventName: string, callback: (data: any) => void): void;
   }
 
@@ -57,9 +62,15 @@ declare module '*/editor/Editor.js' {
         dimensions: [number, number];
         show_outside_canvas: boolean;
         selectNew: boolean;
+        noStorageOnLoad: boolean;
       }): void;
+      shortcuts: {
+        key: string;
+        fn: () => void;
+      }[];
       init(): Promise<void>;
       ready(cb: () => void): Promise<void>;
+      loadSvgString(svgString: string): void;
     };
   };
   export default Editor;

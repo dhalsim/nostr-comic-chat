@@ -1,11 +1,6 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { CharacterEditor } from './components/CharacterEditor';
-import './index.css';
+import { render } from "preact";
 
-const root = createRoot(document.getElementById('app')!);
-root.render(
-  <React.StrictMode>
-    <CharacterEditor />
-  </React.StrictMode>
-); 
+import { CharacterEditor } from "./components/CharacterEditor";
+import "./styles/index.css";
+
+render(<CharacterEditor />, document.getElementById("app")!);

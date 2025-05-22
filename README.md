@@ -4,6 +4,7 @@ This is a clone of Microsoft Comic Chat or MS Chat (https://www.youtube.com/watc
 
 This repository consist of a tool called **Character Editor** to create and upload assets like:
 - Characters
+- Fonts
 - Emotions
 - Backgrounds
 
@@ -26,7 +27,7 @@ A character consists of these SVG files:
 
 and so on
 
-and so on. We need to have defined a **default emotion** as well.
+The  **default emotion** as well.
 
 Emotions have specific keywords (or emojies) that are related to it. Chat clients can automatically show the emotion based on the chat text.
 
@@ -94,36 +95,29 @@ Emotions have specific keywords (or emojies) that are related to it. Chat client
     [
       "emotion-b", ":(", "🥲", "sorry"
     ],
-    ["server", "blossom.band"]
+    [
+      "x",
+      "b1674191a88ec5cdd733e4240a81803105dc412d6c6708d53ab94fc248f4f553",
+      "fonts/font-roboto",
+      "222",
+      "application/font-woff2"
+    ],
+    [
+      "x",
+      "b1674191a88ec5cdd733e4240a81803105dc412d6c6708d53ab94fc248f4f553",
+      "fonts/font-roboto-bold",
+      "222",
+      "application/font-woff2"
+    ],
+    [
+      "x",
+      "",
+      "fonts/font-roboto-italic",
+      "222",
+      "application/font-woff2"
+    ],
   ],
   "content": "",
   "sig": "6a3b99c86ee1b5d0568cbd2d529ed7a53fe0c470964faf0ace0668192c141200297f4c81b2fd3f242e2c6d680e39be193ef6f0a25070a70249dab6ce9e7ea99b"
-}
-```
-
-**Kind 1XXXX**
-Select Character Event
-
-```json
-{
-  "id": "...",
-  "created_at": "...",
-  "content": "",
-  "pubkey": "...",
-  "kind": 10000,
-  "tags:" [
-    [
-      "drive", "my-comic-characters"
-    ],
-    [
-      "character", "/characters/char1"
-    ],
-    [
-      "profile", "/characters/char1/profile"
-    ]
-    [
-      "background", "backgrounds/bg1"
-    ]
-  ]
 }
 ```

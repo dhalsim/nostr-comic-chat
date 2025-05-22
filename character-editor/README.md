@@ -4,11 +4,10 @@ This is the Character Editor tool for Nostr Comic Chat. It allows you to create 
 
 ## Features
 
-- Drawing canvas for creating character emotions
+- Drawing canvas for creating characters and emotions
 - SVG paste support
 - Emotion management with keywords
-- Character configuration
-- Blossom server integration for asset storage
+- Blossom server upload and download
 
 ## Getting Started
 
@@ -27,13 +26,14 @@ npm run dev
 ## Development
 
 The project uses:
-- React
-- Konva for canvas drawing
+- Preact
+- svgedit for canvas drawing
 - Tailwind CSS for styling
 - Vite for build tooling
 
 ## Project Structure
 
 - `src/components/CharacterEditor.tsx` - Main editor component
-- `src/components/Canvas.tsx` - Drawing canvas component
-- `src/components/EmotionManager.tsx` - Emotion management component 
+- `src/components/BlossomServerManager.tsx` - For picking user blossom servers
+- `src/components/DriveSelector.tsx` - Selecting a blossom drive
+- `src/components/FileExplorer.tsx` - Selecting assets from and manipulating the blossom drive

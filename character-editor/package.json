@@ -1,26 +1,36 @@
 {
-  "name": "nostr-comic-character-editor",
-  "version": "0.1.0",
+  "name": "character-editor",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
-  "dependencies": {
-    "@svgedit/svgcanvas": "^7.2.6",
-    "autoprefixer": "^10.4.17",
-    "postcss": "^8.4.35",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "tailwindcss": "^3.4.1",
-    "vite": "^5.1.0"
-  },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --fix --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
+  "dependencies": {
+    "@preact/signals": "^2.0.4",
+    "nostr-tools": "^2.13.0",
+    "preact": "^10.26.6"
+  },
   "devDependencies": {
-    "@babel/plugin-transform-react-jsx-source": "^7.27.1",
-    "@types/react": "^19.1.4",
-    "@types/react-dom": "^19.1.5",
-    "@vitejs/plugin-react": "^4.4.1"
+    "@preact/preset-vite": "^2.10.1",
+    "@types/node": "^22.15.19",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "@vitejs/plugin-react": "^4.4.1",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.4.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "postcss": "^8.4.35",
+    "prettier-eslint": "^16.4.2",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
   }
 }
