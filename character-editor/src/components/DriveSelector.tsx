@@ -34,6 +34,8 @@ export const DriveSelector = ({ value, onChange }: DriveSelectorProps) => {
 
         const drives = await nostrService.getBlossomDrives(userWriteRelays);
 
+        console.log("drives", drives);
+
         setDrives(drives);
       } catch (err) {
         setError("Failed to load drives");

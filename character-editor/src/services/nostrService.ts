@@ -33,6 +33,11 @@ export type BlossomX = {
   mime: string;
 };
 
+export type Emotion = {
+  name: string; // e.g. "emotion-a"
+  keywords: string[]; // e.g. [":)", "😃", "ahah"]
+};
+
 export type BlossomDrive = {
   id: string;
   name: string;
@@ -41,6 +46,7 @@ export type BlossomDrive = {
   d: string;
   folders: string[];
   x: BlossomX[];
+  emotions: Emotion[];
 };
 
 export type BlossomServerCache = {
@@ -233,6 +239,14 @@ export class NostrService {
           };
         });
 
+      // Parse emotions from tags
+      const emotions = drive.tags
+        .filter((tag) => tag[0] === "emotion")
+        .map((tag) => ({
+          name: tag[1],
+          keywords: tag.slice(2),
+        }));
+
       return {
         id: drive.id,
         name,
@@ -241,6 +255,7 @@ export class NostrService {
         d,
         folders,
         x,
+        emotions,
       };
     });
   }
@@ -277,6 +292,11 @@ export class NostrService {
             x.path,
             x.size.toString(),
             x.mime,
+          ]),
+          ...drive.emotions.map((emotion) => [
+            "emotion",
+            emotion.name,
+            ...emotion.keywords,
           ]),
         ],
       };

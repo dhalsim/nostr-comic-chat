@@ -3,12 +3,17 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import Editor from "../editor/Editor.js";
 import { isFulfilled, isRejected } from "../lib/utils.ts";
 import { blossomService } from "../services/blossomService.ts";
-import type { BlossomDrive, ServerOption } from "../services/nostrService.ts";
+import type {
+  BlossomDrive,
+  Emotion,
+  ServerOption,
+} from "../services/nostrService.ts";
 import { nostrService, type UserRelay } from "../services/nostrService.ts";
 import "../styles/svgedit.css";
 
 import { BlossomServerManager } from "./BlossomServerManager.tsx";
 import { DriveSelector } from "./DriveSelector.tsx";
+import { EmotionManager } from "./EmotionManager.tsx";
 import { FileExplorer } from "./FileExplorer.tsx";
 
 type SelectedAsset = {
@@ -231,6 +236,39 @@ export const CharacterEditor = () => {
     setSelectedAsset({ path, sha256, blob });
   };
 
+  const handleEmotionsChange = async (newEmotions: Emotion[]) => {
+    if (!selectedDrive || !selectedAsset) {
+      return;
+    }
+
+    try {
+      selectedDrive.emotions = newEmotions;
+
+      const pubkey = await nostrService.getPubkeyHex();
+      if (!pubkey) {
+        setError("No pubkey available");
+
+        return;
+      }
+
+      const userRelayList = await nostrService.getUserRelayList(pubkey);
+      const userWriteRelays = userRelayList
+        .filter((relay) => relay.write)
+        .map((relay) => relay.url);
+
+      if (!userWriteRelays.length) {
+        setError("No write relays available");
+
+        return;
+      }
+
+      await nostrService.publishBlossomDrive(selectedDrive, userWriteRelays);
+    } catch (err) {
+      setError("Failed to save emotions");
+      console.error(err);
+    }
+  };
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Left Sidebar - File Explorer & Drive Selection */}
@@ -240,10 +278,22 @@ export const CharacterEditor = () => {
         </div>
         <div className="flex-1 overflow-y-auto">
           {selectedDrive && (
-            <FileExplorer
-              drive={selectedDrive}
-              onAssetSelect={handleAssetSelect}
-            />
+            <>
+              <FileExplorer
+                drive={selectedDrive}
+                onAssetSelect={handleAssetSelect}
+              />
+              {selectedAsset && (
+                <div className="border-t border-gray-200">
+                  <EmotionManager
+                    assetPath={selectedAsset.path}
+                    assetSha256={selectedAsset.sha256}
+                    emotions={selectedDrive.emotions}
+                    onEmotionsChange={handleEmotionsChange}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -253,23 +303,25 @@ export const CharacterEditor = () => {
         <div id="container" className="flex-1 min-h-0"></div>
         {/* Asset Management */}
         {selectedAsset && (
-          <div className="flex-none p-4 border-t border-gray-200 bg-white">
-            <div className="flex justify-between items-center">
-              <div className="text-gray-600">
-                {isDirty ? "Unsaved changes" : "All changes saved"}
+          <div className="flex-none border-t border-gray-200 bg-white">
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex justify-between items-center">
+                <div className="text-gray-600">
+                  {isDirty ? "Unsaved changes" : "All changes saved"}
+                </div>
+                {error && <div className="text-red-500">{error}</div>}
+                <button
+                  onClick={handleSaveSvg}
+                  disabled={!isDirty}
+                  className={`px-4 py-2 rounded ${
+                    isDirty
+                      ? "bg-green-500 text-white hover:bg-green-600"
+                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  Save SVG
+                </button>
               </div>
-              {error && <div className="text-red-500">{error}</div>}
-              <button
-                onClick={handleSaveSvg}
-                disabled={!isDirty}
-                className={`px-4 py-2 rounded ${
-                  isDirty
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                Save SVG
-              </button>
             </div>
           </div>
         )}

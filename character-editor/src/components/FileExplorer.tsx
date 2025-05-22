@@ -25,6 +25,7 @@ export const FileExplorer = ({ drive, onAssetSelect }: FileExplorerProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tree, setTree] = useState<AssetNode[]>([]);
+  const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [blobResults, setBlobResults] = useState<Record<string, BlobResult>>(
     {},
   );
@@ -131,6 +132,7 @@ export const FileExplorer = ({ drive, onAssetSelect }: FileExplorerProps) => {
     if (node.type === "file" && node.sha256) {
       const blobResult = blobResults[node.sha256];
       if (blobResult) {
+        setSelectedPath(node.path);
         onAssetSelect(node.path, node.sha256, blobResult.blob);
       }
     }
@@ -138,6 +140,7 @@ export const FileExplorer = ({ drive, onAssetSelect }: FileExplorerProps) => {
 
   const renderNode = (node: AssetNode, level: number = 0) => {
     const paddingLeft = `${level * 1.5}rem`;
+    const isSelected = node.path === selectedPath;
 
     if (node.type === "directory") {
       return (
@@ -155,7 +158,11 @@ export const FileExplorer = ({ drive, onAssetSelect }: FileExplorerProps) => {
       <div
         key={node.path}
         style={{ paddingLeft }}
-        className="flex items-center py-1 text-sm text-gray-600 hover:bg-gray-50 cursor-pointer"
+        className={`flex items-center py-1 text-sm cursor-pointer ${
+          isSelected
+            ? "bg-blue-50 text-blue-700 hover:bg-blue-100"
+            : "text-gray-600 hover:bg-gray-50"
+        }`}
         onClick={() => handleFileSelect(node)}
       >
         <span className="mr-2">📄</span>
