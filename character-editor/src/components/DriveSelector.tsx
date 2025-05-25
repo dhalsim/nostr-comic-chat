@@ -1,14 +1,16 @@
 import { useEffect, useState } from "preact/hooks";
 
-import { nostrService, type BlossomDrive } from "../services/nostrService";
+import { nostrService } from "../services/nostrService";
+import type { BlossomDrive } from "../services/types";
 
 interface DriveSelectorProps {
   value: BlossomDrive | null;
+  drives: BlossomDrive[];
+  setDrives: (drives: BlossomDrive[]) => void;
   onChange: (drive: BlossomDrive | null) => void;
 }
 
-export const DriveSelector = ({ value, onChange }: DriveSelectorProps) => {
-  const [drives, setDrives] = useState<BlossomDrive[]>([]);
+export const DriveSelector = ({ value, drives, setDrives, onChange }: DriveSelectorProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,12 +52,12 @@ export const DriveSelector = ({ value, onChange }: DriveSelectorProps) => {
   }, []);
 
   if (isLoading) {
-    return <div className="p-4 text-sm text-gray-600">Loading drives...</div>;
+    return <div className="p-4 text-sm text-gray-600 ml-2">Loading drives...</div>;
   }
 
   if (error) {
     return (
-      <div className="p-4">
+      <div className="p-4 ml-2">
         <div className="text-sm text-red-600 mb-2">{error}</div>
         <a
           href="https://blossom.hzrd149.com"
@@ -63,7 +65,7 @@ export const DriveSelector = ({ value, onChange }: DriveSelectorProps) => {
           rel="noopener noreferrer"
           className="text-sm text-blue-500 hover:underline"
         >
-          Manage Drives
+          🌸 Manage Drives with another tool
         </a>
       </div>
     );

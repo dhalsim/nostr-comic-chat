@@ -1,4 +1,14 @@
-import { SimplePool } from "nostr-tools";
+import { NostrEvent, SimplePool } from "nostr-tools";
+
+import {
+  asRelayUrl,
+  asServer,
+  type BlossomDrive,
+  type RelayUrl,
+  type Server,
+  type ServerOption,
+  type UserRelay,
+} from "./types";
 
 export const DEFAULT_METADATA_QUERY_RELAYS = [
   "wss://purplepag.es",
@@ -18,42 +28,20 @@ export const FALLBACK_RELAYS = [
   "wss://relay.snort.net",
 ];
 
-export type UserRelay = {
-  url: string;
-  read: boolean;
-  write: boolean;
-};
-
-export type ServerOption = [string, boolean];
-
-export type BlossomX = {
-  sha256: string;
-  path: string;
-  size: number;
-  mime: string;
-};
-
-export type Emotion = {
-  name: string; // e.g. "emotion-a"
-  keywords: string[]; // e.g. [":)", "😃", "ahah"]
-};
-
-export type BlossomDrive = {
-  id: string;
-  name: string;
-  description: string;
-  servers: string[];
-  d: string;
-  folders: string[];
-  x: BlossomX[];
-  emotions: Emotion[];
-};
-
 export type BlossomServerCache = {
   pubkey: string;
   servers: ServerOption[];
   timestamp: number;
 };
+
+type UpdateDriveParams = {
+  updatedDrive: BlossomDrive;
+  selectedDrive: BlossomDrive;
+  selectedServers: Server[];
+  userWriteRelays: RelayUrl[];
+  setDrives: (drives: BlossomDrive[]) => void;
+  setSelectedDrive: (drive: BlossomDrive) => void;
+}
 
 export class NostrService {
   private pool: SimplePool;
@@ -80,7 +68,7 @@ export class NostrService {
       const relays = nip65.tags
         .filter((tag) => tag[0] === "r")
         .map((tag) => ({
-          url: tag[1],
+          url: asRelayUrl(tag[1]),
           read: tag[2] === "read" || !tag[2],
           write: tag[2] === "write" || !tag[2],
         }));
@@ -91,7 +79,7 @@ export class NostrService {
     }
 
     return FALLBACK_RELAYS.map((relay) => ({
-      url: relay,
+      url: asRelayUrl(relay),
       read: true,
       write: true,
     }));
@@ -103,12 +91,20 @@ export class NostrService {
     }
 
     try {
-      const pubkey = await window.nostr.getPublicKey();
+      console.log("getting pubkey");
 
-      console.log("pubkey", pubkey);
+      const pubkey = await window.nostr.getPublicKey();
 
       return pubkey;
     } catch (error) {
+      if (
+        (error as Error).message ===
+        "Nostr extension took over, please retry the operation"
+      ) {
+        // Retry the operation since the extension is now available
+        return await window.nostr.getPublicKey();
+      }
+
       console.error("Failed to get pubkey:", error);
 
       return null;
@@ -140,7 +136,7 @@ export class NostrService {
 
     const userWriteRelays = userRelayList
       .filter((relay) => relay.write)
-      .map((relay) => relay.url);
+      .map((relay) => relay.url.toString());
 
     console.log(
       "userWriteRelays for fetching Blossom servers",
@@ -166,9 +162,11 @@ export class NostrService {
         );
 
         const allServers: ServerOption[] = servers
-          .map((server): ServerOption => [server, true])
+          .map((server): ServerOption => [asServer(server), true])
           .concat(
-            uniqueDefaultServers.map((server): ServerOption => [server, false]),
+            uniqueDefaultServers.map(
+              (server): ServerOption => [asServer(server), false],
+            ),
           );
 
         this.blossomServerCache.set(pubkey, {
@@ -181,7 +179,7 @@ export class NostrService {
       } else {
         // Default servers if no list is found
         const ds: ServerOption[] = defaultServers.map((server) => [
-          server,
+          asServer(server),
           false,
         ]);
 
@@ -212,14 +210,32 @@ export class NostrService {
       authors: [pubkey],
     });
 
-    return drives.map((drive) => {
+    // deduplicate drives by unique d values, gets the latest one
+    const driveMap = new Map<string, NostrEvent>();
+    drives.forEach((drive) => {
+      const d = drive.tags.find((tag) => tag[0] === "d")?.[1];
+      
+      if (d) {
+        if (!driveMap.has(d)) {
+          driveMap.set(d, drive);
+        } else {
+          const existingDrive = driveMap.get(d);
+          
+          if (existingDrive && existingDrive.created_at < drive.created_at) {
+            driveMap.set(d, drive);
+          }
+        }
+      }
+    });
+
+    return Array.from(driveMap.values()).map((drive) => {
       const name = drive.tags.find((tag) => tag[0] === "name")?.[1] || "";
       const description =
         drive.tags.find((tag) => tag[0] === "description")?.[1] || "";
       const d = drive.tags.find((tag) => tag[0] === "d")?.[1] || "";
       const servers = drive.tags
         .filter((tag) => tag[0] === "server")
-        .map((tag) => tag[1]);
+        .map((tag) => asServer(tag[1]));
       const folders = drive.tags
         .filter((tag) => tag[0] === "folder")
         .map((tag) => tag[1]);
@@ -262,7 +278,8 @@ export class NostrService {
 
   async publishBlossomDrive(
     drive: BlossomDrive,
-    userWriteRelays: string[],
+    servers: Server[],
+    userWriteRelays: RelayUrl[],
   ): Promise<void> {
     const pubkey = await this.getPubkeyHex();
 
@@ -284,7 +301,7 @@ export class NostrService {
           ["name", drive.name],
           ["description", drive.description],
           ["d", drive.d],
-          ...drive.servers.map((server) => ["server", server]),
+          ...servers.map((server) => ["server", server.toString()]),
           ...drive.folders.map((folder) => ["folder", folder]),
           ...drive.x.map((x) => [
             "x",
@@ -303,7 +320,10 @@ export class NostrService {
 
       const signedEvent = await window.nostr.signEvent(event);
 
-      await this.pool.publish(userWriteRelays, signedEvent);
+      await this.pool.publish(
+        userWriteRelays.map((relay) => relay.toString()),
+        signedEvent,
+      );
     } catch (error) {
       console.error("Failed to publish Blossom drive:", error);
 
@@ -312,8 +332,8 @@ export class NostrService {
   }
 
   async publishBlossomServers(
-    selectedBlossomServers: string[],
-    userWriteRelays: string[],
+    selectedBlossomServers: Server[],
+    userWriteRelays: RelayUrl[],
   ): Promise<void> {
     const pubkey = await this.getPubkeyHex();
 
@@ -331,18 +351,39 @@ export class NostrService {
         created_at: Math.floor(Date.now() / 1000),
         pubkey,
         content: "",
-        tags: selectedBlossomServers.map((server) => ["server", server]),
+        tags: selectedBlossomServers.map((server) => [
+          "server",
+          server.toString(),
+        ]),
       };
 
       const signedEvent = await window.nostr.signEvent(event);
 
-      await this.pool.publish(userWriteRelays, signedEvent);
+      await this.pool.publish(
+        userWriteRelays.map((relay) => relay.toString()),
+        signedEvent,
+      );
     } catch (error) {
       console.error("Failed to set Blossom servers:", error);
 
       throw error;
     }
   }
+
+  async updateDrive({ updatedDrive, selectedDrive, selectedServers, userWriteRelays, setDrives, setSelectedDrive }: UpdateDriveParams) {
+    // Publish the updated drive
+    await nostrService.publishBlossomDrive(
+      updatedDrive,
+      selectedServers,
+      userWriteRelays,
+    );
+  
+    const modifiedDrives = await nostrService.getBlossomDrives(userWriteRelays);
+  
+    // Update the selected drive
+    setDrives(modifiedDrives);
+    setSelectedDrive(modifiedDrives.find((drive) => drive.name === selectedDrive.name)!);
+  };
 }
 
 export const nostrService = new NostrService();

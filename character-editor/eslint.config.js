@@ -7,6 +7,11 @@ export default [
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    env: {
+      browser: true,
+      es2024: true,
+      node: true,
+    },
     files: ["**/*.{js,ts,tsx}"],
     languageOptions: {
       ecmaVersion: "latest",

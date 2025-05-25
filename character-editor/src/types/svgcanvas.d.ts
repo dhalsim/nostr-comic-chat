@@ -6,6 +6,8 @@ declare module "*/editor/Editor.js" {
     getCurrentDrawing(): any;
     getSelectedElements(): any[];
     clear(): void;
+    getElement(element: string): HTMLElement;
+    container: HTMLElement;
     undo(): void;
     redo(): void;
     copySelectedElements(): void;

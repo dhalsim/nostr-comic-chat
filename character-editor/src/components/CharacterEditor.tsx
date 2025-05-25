@@ -1,26 +1,35 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 
 import Editor from "../editor/Editor.js";
-import { isFulfilled, isRejected } from "../lib/utils.ts";
+import { assertUnreachable, isFulfilled, isRejected } from "../lib/utils.ts";
 import { blossomService } from "../services/blossomService.ts";
+import { nostrService } from "../services/nostrService.ts";
 import type {
   BlossomDrive,
   Emotion,
+  RelayUrl,
+  Server,
   ServerOption,
-} from "../services/nostrService.ts";
-import { nostrService, type UserRelay } from "../services/nostrService.ts";
+  UserRelay,
+} from "../services/types";
 import "../styles/svgedit.css";
 
 import { BlossomServerManager } from "./BlossomServerManager.tsx";
 import { DriveSelector } from "./DriveSelector.tsx";
-import { EmotionManager } from "./EmotionManager.tsx";
-import { FileExplorer } from "./FileExplorer.tsx";
+import { FileExplorer } from "./FileManager/FileExplorer.tsx";
 
 type SelectedAsset = {
   path: string;
   sha256: string;
   blob: Blob;
 };
+
+export type HandleAssetSelectParams = {
+  type: "Select";
+  path: string;
+  sha256: string;
+  blob: Blob;
+} | { type: "Clear", path: string; };
 
 export const CharacterEditor = () => {
   const svgEditorRef = useRef<InstanceType<typeof Editor> | null>(null);
@@ -30,6 +39,7 @@ export const CharacterEditor = () => {
   );
   const [isDirty, setIsDirty] = useState(false);
   const [isEditorReady, setIsEditorReady] = useState(false);
+  const [drives, setDrives] = useState<BlossomDrive[]>([]);
   const [selectedDrive, setSelectedDrive] = useState<BlossomDrive | null>(null);
   const [userRelayList, setUserRelayList] = useState<UserRelay[]>([]);
   const [servers, setServers] = useState<ServerOption[]>([]);
@@ -70,7 +80,7 @@ export const CharacterEditor = () => {
         },
         initOpacity: 1,
         dimensions: [640, 480] as [number, number],
-        show_outside_canvas: true,
+        show_outside_canvas: false,
         selectNew: true,
         noStorageOnLoad: true,
       });
@@ -156,12 +166,13 @@ export const CharacterEditor = () => {
 
     const svgContent = svgEditorRef.current.svgCanvas.getSvgString();
     const svgBlob = new Blob([svgContent], { type: "image/svg+xml" });
+    const selectedServers: Server[] = servers
+      .filter(({ 1: selected }) => selected)
+      .map(({ 0: server }) => server);
 
     const uploadResults = await blossomService.uploadAsset(
       svgBlob,
-      servers
-        .filter(({ 1: selected }) => selected)
-        .map(({ 0: server }) => server),
+      selectedServers,
     );
 
     const fulfilledResults = uploadResults.filter(isFulfilled);
@@ -204,16 +215,16 @@ export const CharacterEditor = () => {
       return x;
     });
 
-    await nostrService.publishBlossomDrive(selectedDrive, userWriteRelays);
+    await nostrService.publishBlossomDrive(
+      selectedDrive,
+      selectedServers,
+      userWriteRelays,
+    );
 
     setIsDirty(false);
   };
 
-  const handleAssetSelect = async (
-    path: string,
-    sha256: string,
-    blob: Blob,
-  ) => {
+  const handleAssetSelect = async (params: HandleAssetSelectParams) => {
     if (!svgEditorRef.current) {
       return;
     }
@@ -222,18 +233,24 @@ export const CharacterEditor = () => {
       return;
     }
 
-    if (isDirty) {
-      if (!confirm("You have unsaved changes. Do you want to continue?")) {
-        return;
-      }
+    console.log("Selected asset:", params.path);
+    const cb = svgEditorRef.current.svgCanvas.getElement("canvasBackground");
+
+    if (params.type === "Select") {
+      cb.style.display = "block";
+      svgEditorRef.current.loadSvgString(await params.blob.text());
+      
+      setSelectedAsset({ path: params.path, sha256: params.sha256, blob: params.blob });
+    } else if (params.type === "Clear") {
+      svgEditorRef.current.svgCanvas.clear();
+      cb.style.display = "none"
+
+      setSelectedAsset(null);
+    } else {
+      assertUnreachable(params);
     }
 
-    console.log("Selected asset:", path);
-
-    svgEditorRef.current.loadSvgString(await blob.text());
-
     setIsDirty(false);
-    setSelectedAsset({ path, sha256, blob });
   };
 
   const handleEmotionsChange = async (newEmotions: Emotion[]) => {
@@ -262,7 +279,15 @@ export const CharacterEditor = () => {
         return;
       }
 
-      await nostrService.publishBlossomDrive(selectedDrive, userWriteRelays);
+      const selectedServers: Server[] = servers
+        .filter(({ 1: selected }) => selected)
+        .map(({ 0: server }) => server);
+
+      await nostrService.publishBlossomDrive(
+        selectedDrive,
+        selectedServers,
+        userWriteRelays,
+      );
     } catch (err) {
       setError("Failed to save emotions");
       console.error(err);
@@ -274,26 +299,21 @@ export const CharacterEditor = () => {
       {/* Left Sidebar - File Explorer & Drive Selection */}
       <div className="w-64 h-full border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
-          <DriveSelector value={selectedDrive} onChange={setSelectedDrive} />
+          <DriveSelector value={selectedDrive} drives={drives} setDrives={setDrives} onChange={setSelectedDrive} />
         </div>
         <div className="flex-1 overflow-y-auto">
           {selectedDrive && (
-            <>
-              <FileExplorer
-                drive={selectedDrive}
-                onAssetSelect={handleAssetSelect}
-              />
-              {selectedAsset && (
-                <div className="border-t border-gray-200">
-                  <EmotionManager
-                    assetPath={selectedAsset.path}
-                    assetSha256={selectedAsset.sha256}
-                    emotions={selectedDrive.emotions}
-                    onEmotionsChange={handleEmotionsChange}
-                  />
-                </div>
-              )}
-            </>
+            <FileExplorer
+              drive={selectedDrive}
+              setDrives={setDrives}
+              setSelectedDrive={setSelectedDrive}
+              userWriteRelays={userRelayList
+                .filter((relay) => relay.write)
+                .map((relay) => relay.url)}
+              isDirty={isDirty}
+              onAssetSelect={handleAssetSelect}
+              onEmotionsChange={handleEmotionsChange}
+            />
           )}
         </div>
       </div>
@@ -354,3 +374,4 @@ export const CharacterEditor = () => {
     </div>
   );
 };
+

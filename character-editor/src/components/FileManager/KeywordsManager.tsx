@@ -1,6 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
 
-import type { Emotion } from "../services/nostrService";
+import type { Emotion } from "../../services/types";
 
 type SaveButtonState = "idle" | "saving" | "saved";
 

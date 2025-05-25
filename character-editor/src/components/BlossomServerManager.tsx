@@ -1,10 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 
-import {
-  nostrService,
-  type ServerOption,
-  type UserRelay,
-} from "../services/nostrService";
+import { nostrService } from "../services/nostrService";
+import type { Server, ServerOption, UserRelay } from "../services/types";
+import { asServer } from "../services/types";
 
 export const BlossomServerManager = ({
   userRelayList,
@@ -49,7 +47,7 @@ export const BlossomServerManager = ({
     try {
       const updatedServers: ServerOption[] = [
         ...servers,
-        [newServer.trim(), true],
+        [asServer(newServer.trim()), true],
       ];
 
       setServers(updatedServers);
@@ -64,7 +62,7 @@ export const BlossomServerManager = ({
   };
 
   const publishServers = async () => {
-    const selectedServers = servers
+    const selectedServers: Server[] = servers
       .filter(([_, selected]) => selected)
       .map(([server]) => server);
 
@@ -89,9 +87,13 @@ export const BlossomServerManager = ({
   };
 
   const handleToggleServer = (server: string) => {
-    const updatedServers = servers.map(([s, selected]) =>
-      s === server ? [s, !selected] : [s, selected],
-    ) as ServerOption[];
+    const updatedServers: ServerOption[] = servers.map(([s, selected]) => {
+      if (s === server) {
+        return [s, !selected];
+      }
+
+      return [s, selected];
+    });
 
     setServers(updatedServers);
   };
@@ -102,7 +104,7 @@ export const BlossomServerManager = ({
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Blossom Servers</h2>
+      <h2 className="text-xl font-bold mb-4">🌸 Blossom Servers</h2>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
