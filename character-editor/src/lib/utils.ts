@@ -1,6 +1,5 @@
-import { SvgNode } from "../components/FileManager/types";
-
-import { AssetNode } from "../components/FileManager/types";
+import type { SvgNode } from "../components/FileManager/types";
+import type { AssetNode } from "../components/FileManager/types";
 
 export function isFulfilled<T>(
   result: PromiseSettledResult<T>,
@@ -18,11 +17,17 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function assertUnreachable(x: never, message: string = 'Unreachable code path'): never {
+export function assertUnreachable(
+  x: never,
+  message: string = "Unreachable code path",
+): never {
   throw new Error(`${message}. Received value: ${JSON.stringify(x)}`);
 }
 
-export const findParentFolder = (svgNode: SvgNode, tree: AssetNode[]): string => {
+export const findParentFolder = (
+  svgNode: SvgNode,
+  tree: AssetNode[],
+): string => {
   const targetPath = svgNode.path.substring(0, svgNode.path.lastIndexOf("/"));
 
   const findParentNode = (nodes: AssetNode[]): AssetNode | undefined => {
@@ -31,15 +36,15 @@ export const findParentFolder = (svgNode: SvgNode, tree: AssetNode[]): string =>
         if (node.path === targetPath) {
           return node;
         }
-        
+
         const found = findParentNode(node.children);
-        
+
         if (found) {
           return found;
         }
       }
     }
-    
+
     return undefined;
   };
 
@@ -52,15 +57,18 @@ export const findParentFolder = (svgNode: SvgNode, tree: AssetNode[]): string =>
   return parent.path;
 };
 
-export const getNodeByPath = (path: string, tree: AssetNode[]): AssetNode | undefined => {
+export const getNodeByPath = (
+  path: string,
+  tree: AssetNode[],
+): AssetNode | undefined => {
   for (const node of tree) {
     if (node.path === path) {
       return node;
     }
-    
+
     if (node.type === "directory") {
       const found = getNodeByPath(path, node.children);
-      
+
       if (found) {
         return found;
       }

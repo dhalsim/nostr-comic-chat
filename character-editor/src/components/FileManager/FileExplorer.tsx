@@ -1,13 +1,13 @@
 import { useEffect, useState } from "preact/hooks";
 
-import { type HandleAssetSelectParams } from "../CharacterEditor";
-
+import { assertUnreachable, getNodeByPath } from "../../lib/utils";
 import { blossomService } from "../../services/blossomService";
 import type { BlossomDrive, RelayUrl, Emotion } from "../../services/types";
-import { assertUnreachable, getNodeByPath } from "../../lib/utils";
 
-import { EmotionManager } from "./KeywordsManager";
+import { type HandleAssetSelectParams } from "../CharacterEditor";
+
 import { FileExplorerToolbar, onEditPath } from "./FileExplorerToolbar";
+import { EmotionManager } from "./KeywordsManager";
 import type { AssetNode, BlobResult, DirectoryNode, SvgNode } from "./types";
 
 interface FileExplorerProps {
@@ -33,7 +33,9 @@ export const FileExplorer = ({
   const [error, setError] = useState<string | null>(null);
   const [tree, setTree] = useState<AssetNode[]>([]);
   const [selectedNode, setSelectedNode] = useState<AssetNode | null>(null);
-  const [blobResults, setBlobResults] = useState<Record<string, BlobResult>>({});
+  const [blobResults, setBlobResults] = useState<Record<string, BlobResult>>(
+    {},
+  );
   const [draggedNode, setDraggedNode] = useState<AssetNode | null>(null);
   const [dragOverNode, setDragOverNode] = useState<AssetNode | null>(null);
 
@@ -100,7 +102,12 @@ export const FileExplorer = ({
       const blobResult = blobResults[node.sha256];
 
       if (blobResult) {
-        onAssetSelect({ type: "Select", path: node.path, sha256: node.sha256, blob: blobResult.blob });
+        onAssetSelect({
+          type: "Select",
+          path: node.path,
+          sha256: node.sha256,
+          blob: blobResult.blob,
+        });
       }
     } else if (node.type === "directory") {
       onAssetSelect({ type: "Clear", path: node.path });
@@ -114,7 +121,7 @@ export const FileExplorer = ({
 
     e.stopPropagation();
     setDraggedNode(node);
-    e.dataTransfer?.setData('text/plain', node.path);
+    e.dataTransfer?.setData("text/plain", node.path);
   };
 
   const handleDragOver = (e: DragEvent, node: AssetNode) => {
@@ -127,7 +134,7 @@ export const FileExplorer = ({
 
   const handleDragLeave = (e: DragEvent) => {
     console.log("handleDragLeave");
-    
+
     e.preventDefault();
     e.stopPropagation();
     setDragOverNode(null);
@@ -135,18 +142,27 @@ export const FileExplorer = ({
 
   const handleDrop = async (e: DragEvent, targetNode: AssetNode) => {
     console.log("handleDrop", targetNode);
-    
+
     e.preventDefault();
     e.stopPropagation();
     setDragOverNode(null);
 
-    if (!draggedNode || !drive) return;
+    if (!draggedNode || !drive) {
+      return;
+    }
 
     // Don't allow dropping on itself
-    if (draggedNode.path === targetNode.path) return;
+    if (draggedNode.path === targetNode.path) {
+      return;
+    }
 
     // Don't allow dropping a directory into its own subdirectory
-    if (draggedNode.type === "directory" && targetNode.path.startsWith(draggedNode.path)) return;
+    if (
+      draggedNode.type === "directory" &&
+      targetNode.path.startsWith(draggedNode.path)
+    ) {
+      return;
+    }
 
     // Calculate new path
     let newPath: string;
@@ -154,13 +170,17 @@ export const FileExplorer = ({
       newPath = `${targetNode.path}/${draggedNode.name}`;
     } else {
       // If dropping on a file, get its parent directory
-      const targetDir = targetNode.path.substring(0, targetNode.path.lastIndexOf("/"));
+      const targetDir = targetNode.path.substring(
+        0,
+        targetNode.path.lastIndexOf("/"),
+      );
       newPath = `${targetDir}/${draggedNode.name}`;
     }
 
     // Check if path already exists
     if (getNodeByPath(newPath, tree)) {
       alert("Path already exists");
+
       return;
     }
 
@@ -314,8 +334,8 @@ export const buildTree = (drive: BlossomDrive): AssetNode[] => {
 
     pathParts.forEach((part, index) => {
       let childNode = currentNode.children.find(
-        (node): node is DirectoryNode => 
-          node.type === "directory" && node.name === part
+        (node): node is DirectoryNode =>
+          node.type === "directory" && node.name === part,
       );
 
       if (!childNode) {
@@ -325,7 +345,7 @@ export const buildTree = (drive: BlossomDrive): AssetNode[] => {
           type: "directory",
           children: [],
         };
-        
+
         addNodeToChildren(currentNode, childNode);
       }
 
@@ -342,8 +362,8 @@ export const buildTree = (drive: BlossomDrive): AssetNode[] => {
     for (let i = 0; i < pathParts.length - 1; i++) {
       const part = pathParts[i];
       let childNode = currentNode.children.find(
-        (node): node is DirectoryNode => 
-          node.type === "directory" && node.name === part
+        (node): node is DirectoryNode =>
+          node.type === "directory" && node.name === part,
       );
 
       if (!childNode) {
@@ -353,7 +373,7 @@ export const buildTree = (drive: BlossomDrive): AssetNode[] => {
           type: "directory",
           children: [],
         };
-        
+
         addNodeToChildren(currentNode, childNode);
       }
 
@@ -370,7 +390,7 @@ export const buildTree = (drive: BlossomDrive): AssetNode[] => {
         sha256: x.sha256,
         mime: "image/svg+xml",
       };
-      
+
       addNodeToChildren(currentNode, fileNode);
     }
   });

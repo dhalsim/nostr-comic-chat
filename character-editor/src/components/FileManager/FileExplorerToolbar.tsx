@@ -1,13 +1,22 @@
 import { useState } from "preact/hooks";
 
-import { assertUnreachable, findParentFolder, getNodeByPath } from "../../lib/utils";
+import {
+  assertUnreachable,
+  findParentFolder,
+  getNodeByPath,
+} from "../../lib/utils";
 import { blossomService } from "../../services/blossomService";
-import { nostrService } from "../../services/nostrService";
-import type { BlossomDrive, BlossomX, RelayUrl, Server } from "../../services/types";
 import type { BlobDescriptor } from "../../services/blossomService";
+import { nostrService } from "../../services/nostrService";
+import type {
+  BlossomDrive,
+  BlossomX,
+  RelayUrl,
+  Server,
+} from "../../services/types";
 
-import { UploadModal } from "./UploadModal";
 import type { AssetNode, FileSource } from "./types";
+import { UploadModal } from "./UploadModal";
 
 interface FileExplorerToolbarProps {
   selectedNode: AssetNode;
@@ -47,7 +56,14 @@ export const FileExplorerToolbar = ({
         x: selectedDrive.x.filter((x) => x.path !== selectedNode.path),
       };
 
-      await nostrService.updateDrive({ updatedDrive, selectedDrive, selectedServers, userWriteRelays, setDrives, setSelectedDrive });
+      await nostrService.updateDrive({
+        updatedDrive,
+        selectedDrive,
+        selectedServers,
+        userWriteRelays,
+        setDrives,
+        setSelectedDrive,
+      });
 
       await blossomService.deleteFile(selectedNode.sha256, selectedServers);
     } else if (selectedNode.type === "directory") {
@@ -67,7 +83,14 @@ export const FileExplorerToolbar = ({
         x: selectedDrive.x.filter((x) => !x.path.startsWith(selectedNode.path)),
       };
 
-      await nostrService.updateDrive({ updatedDrive, selectedDrive, selectedServers, userWriteRelays, setDrives, setSelectedDrive });
+      await nostrService.updateDrive({
+        updatedDrive,
+        selectedDrive,
+        selectedServers,
+        userWriteRelays,
+        setDrives,
+        setSelectedDrive,
+      });
 
       const deleteFolder = async (folder: AssetNode) => {
         if (folder.type === "svg") {
@@ -90,9 +113,10 @@ export const FileExplorerToolbar = ({
 
   const onNewFolder = async () => {
     // Get the target directory path where the new folder will be created
-    const targetDirPath = selectedNode.type === "svg" 
-      ? selectedNode.path.substring(0, selectedNode.path.lastIndexOf("/"))
-      : selectedNode.path;
+    const targetDirPath =
+      selectedNode.type === "svg"
+        ? selectedNode.path.substring(0, selectedNode.path.lastIndexOf("/"))
+        : selectedNode.path;
 
     // Prompt for folder name
     const folderName = prompt("Enter folder name:");
@@ -105,7 +129,7 @@ export const FileExplorerToolbar = ({
 
     if (getNodeByPath(newFolderPath, tree)) {
       alert("Path already exists");
-      
+
       return;
     }
 
@@ -115,27 +139,36 @@ export const FileExplorerToolbar = ({
       folders: [...selectedDrive.folders, newFolderPath],
     };
 
-    await nostrService.updateDrive({ updatedDrive, selectedDrive, selectedServers, userWriteRelays, setDrives, setSelectedDrive });
+    await nostrService.updateDrive({
+      updatedDrive,
+      selectedDrive,
+      selectedServers,
+      userWriteRelays,
+      setDrives,
+      setSelectedDrive,
+    });
   };
 
   const onDuplicate = async () => {
     if (selectedNode.type === "svg") {
       // Update the drive with the new file
-      const toDuplicate = selectedDrive.x.find((x) => x.path === selectedNode.path);
-      
+      const toDuplicate = selectedDrive.x.find(
+        (x) => x.path === selectedNode.path,
+      );
+
       if (!toDuplicate) {
         return;
       }
 
       const newPath = prompt("Enter new path:", selectedNode.path);
-      
+
       if (!newPath?.trim()) {
         return;
       }
 
       if (getNodeByPath(newPath, tree)) {
         alert("Path already exists");
-        
+
         return;
       }
 
@@ -143,20 +176,29 @@ export const FileExplorerToolbar = ({
 
       const updatedDrive = {
         ...selectedDrive,
-        x: [...selectedDrive.x, toDuplicate].sort((a, b) => a.path.localeCompare(b.path)),
+        x: [...selectedDrive.x, toDuplicate].sort((a, b) =>
+          a.path.localeCompare(b.path),
+        ),
       };
 
-      await nostrService.updateDrive({ updatedDrive, selectedDrive, selectedServers, userWriteRelays, setDrives, setSelectedDrive });
+      await nostrService.updateDrive({
+        updatedDrive,
+        selectedDrive,
+        selectedServers,
+        userWriteRelays,
+        setDrives,
+        setSelectedDrive,
+      });
     } else if (selectedNode.type === "directory") {
       const newPath = prompt("Enter new path:", selectedNode.path);
-      
+
       if (!newPath?.trim()) {
         return;
       }
 
       if (getNodeByPath(newPath, tree)) {
         alert("Path already exists");
-        
+
         return;
       }
 
@@ -167,7 +209,11 @@ export const FileExplorerToolbar = ({
           const toDuplicate = selectedDrive.x.find((x) => x.path === node.path);
 
           if (toDuplicate) {
-            duplicates.push({ ...toDuplicate, path: newPath + toDuplicate.path.substring(selectedNode.path.length) });
+            duplicates.push({
+              ...toDuplicate,
+              path:
+                newPath + toDuplicate.path.substring(selectedNode.path.length),
+            });
           }
         } else if (node.type === "directory") {
           node.children.forEach(async (child) => {
@@ -182,10 +228,19 @@ export const FileExplorerToolbar = ({
 
       const updatedDrive = {
         ...selectedDrive,
-        x: [...selectedDrive.x, ...duplicates].sort((a, b) => a.path.localeCompare(b.path)),
+        x: [...selectedDrive.x, ...duplicates].sort((a, b) =>
+          a.path.localeCompare(b.path),
+        ),
       };
 
-      await nostrService.updateDrive({ updatedDrive, selectedDrive, selectedServers, userWriteRelays, setDrives, setSelectedDrive });
+      await nostrService.updateDrive({
+        updatedDrive,
+        selectedDrive,
+        selectedServers,
+        userWriteRelays,
+        setDrives,
+        setSelectedDrive,
+      });
     } else {
       assertUnreachable(selectedNode);
     }
@@ -196,29 +251,45 @@ export const FileExplorerToolbar = ({
   };
 
   const handleUpload = async (source: FileSource) => {
-    const path = selectedNode.type === "svg" ? findParentFolder(selectedNode, tree) : selectedNode.path;
+    const path =
+      selectedNode.type === "svg"
+        ? findParentFolder(selectedNode, tree)
+        : selectedNode.path;
 
-    let results: PromiseSettledResult<BlobDescriptor | { size: number, url: string, sha256: string }>[];
+    let results: PromiseSettledResult<
+      BlobDescriptor | { size: number; url: string; sha256: string }
+    >[];
 
-    if (source.type === 'file') {
+    if (source.type === "file") {
       results = await blossomService.uploadAsset(source.file, selectedServers);
-    } else if (source.type === 'url') {
+    } else if (source.type === "url") {
       // Fetch the file first
       const response = await fetch(source.url);
       const blob = await response.blob();
-      const file = new File([blob], 'downloaded.svg', { type: 'image/svg+xml' });
-      
+      const file = new File([blob], "downloaded.svg", {
+        type: "image/svg+xml",
+      });
+
       results = await blossomService.uploadAsset(file, selectedServers);
-    } else if (source.type === 'hash') {
-      const { size, url, sha256 } = await blossomService.fetchFile(source.hash, selectedServers);
-      
-      results = [{ status: 'fulfilled' as const, value: { size, url, sha256 } }];
+    } else if (source.type === "hash") {
+      const { size, url, sha256 } = await blossomService.fetchFile(
+        source.hash,
+        selectedServers,
+      );
+
+      results = [
+        { status: "fulfilled" as const, value: { size, url, sha256 } },
+      ];
     } else {
       assertUnreachable(source);
     }
 
-    const successfulResults = results.filter((result) => result.status === "fulfilled");
-    const failedResults = results.filter((result) => result.status === "rejected");
+    const successfulResults = results.filter(
+      (result) => result.status === "fulfilled",
+    );
+    const failedResults = results.filter(
+      (result) => result.status === "rejected",
+    );
 
     successfulResults.forEach((result) => {
       console.log("Uploaded asset to: ", result.value.url);
@@ -228,38 +299,48 @@ export const FileExplorerToolbar = ({
       console.error("Failed to upload asset: ", result.reason);
     });
 
-    if (successfulResults.length === 0) {        
+    if (successfulResults.length === 0) {
       return;
     }
 
     const result = successfulResults[0].value;
 
     const getFileName = (source: FileSource) => {
-      if (source.type === 'file') {
+      if (source.type === "file") {
         return source.file.name;
-      } else if (source.type === 'url') {
-        return source.url.split('/').pop() || 'downloaded.svg';
-      } else if (source.type === 'hash') {
+      } else if (source.type === "url") {
+        return source.url.split("/").pop() || "downloaded.svg";
+      } else if (source.type === "hash") {
         return `${source.name}.svg`;
       } else {
         assertUnreachable(source);
       }
-    }
+    };
 
     const fileName = getFileName(source);
 
     const updatedDrive = {
       ...selectedDrive,
-      x: [...selectedDrive.x, {
-        sha256: result.sha256,
-        path: `${path}/${fileName}`,
-        size: result.size,
-        mime: "image/svg+xml",
-      }].sort((a, b) => a.path.localeCompare(b.path)),
+      x: [
+        ...selectedDrive.x,
+        {
+          sha256: result.sha256,
+          path: `${path}/${fileName}`,
+          size: result.size,
+          mime: "image/svg+xml",
+        },
+      ].sort((a, b) => a.path.localeCompare(b.path)),
       folders: selectedDrive.folders.filter((folder) => folder !== path),
     };
 
-    await nostrService.updateDrive({ updatedDrive, selectedDrive, selectedServers, userWriteRelays, setDrives, setSelectedDrive });
+    await nostrService.updateDrive({
+      updatedDrive,
+      selectedDrive,
+      selectedServers,
+      userWriteRelays,
+      setDrives,
+      setSelectedDrive,
+    });
   };
 
   return (
@@ -287,28 +368,28 @@ export const FileExplorerToolbar = ({
           📋
         </button>
         <button
-          onClick={() => { 
+          onClick={() => {
             const newPath = prompt("Enter new path:", selectedNode.path);
-            
+
             if (!newPath?.trim()) {
               return;
             }
 
             if (getNodeByPath(newPath, tree)) {
               alert("Path already exists");
-              
+
               return;
             }
-            
-            return onEditPath({ 
-              newPath, 
-              selectedNode, 
-              selectedDrive, 
-              selectedServers, 
-              userWriteRelays, 
-              setDrives, 
-              setSelectedDrive, 
-            })
+
+            return onEditPath({
+              newPath,
+              selectedNode,
+              selectedDrive,
+              selectedServers,
+              userWriteRelays,
+              setDrives,
+              setSelectedDrive,
+            });
           }}
           className="w-8 h-8 flex items-center justify-center text-lg bg-yellow-50 text-yellow-600 rounded hover:bg-yellow-100"
           title="Edit Path"
@@ -328,7 +409,11 @@ export const FileExplorerToolbar = ({
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         onUpload={handleUpload}
-        path={selectedNode.type === "svg" ? findParentFolder(selectedNode, tree) : selectedNode.path}
+        path={
+          selectedNode.type === "svg"
+            ? findParentFolder(selectedNode, tree)
+            : selectedNode.path
+        }
       />
     </>
   );
@@ -347,12 +432,12 @@ export const updateFolder = ({
     if (folder === selectedNode.path) {
       return newPath;
     }
-    
+
     // If this is a child folder, update its path to reflect the parent's new path
     if (folder.startsWith(selectedNode.path + "/")) {
       return newPath + folder.substring(selectedNode.path.length);
     }
-    
+
     return folder;
   });
 };
@@ -373,20 +458,18 @@ export const updatePath = ({
         path: newPath + blossomX.path.substring(selectedNode.path.length),
       };
     }
-    
+
     return blossomX;
   });
 };
-
-
 
 export const onEditPath = async ({
   newPath,
   selectedNode,
   selectedDrive,
-  selectedServers, 
-  userWriteRelays, 
-  setDrives, 
+  selectedServers,
+  userWriteRelays,
+  setDrives,
   setSelectedDrive,
 }: {
   newPath: string;
@@ -397,30 +480,45 @@ export const onEditPath = async ({
   setDrives: (drives: BlossomDrive[]) => void;
   setSelectedDrive: (drive: BlossomDrive) => void;
 }) => {
-  if (selectedNode.type === "svg") { 
+  if (selectedNode.type === "svg") {
     // Get the source and target folder paths
-    const sourceFolderPath = selectedNode.path.substring(0, selectedNode.path.lastIndexOf("/"));
+    const sourceFolderPath = selectedNode.path.substring(
+      0,
+      selectedNode.path.lastIndexOf("/"),
+    );
     const targetFolderPath = newPath.substring(0, newPath.lastIndexOf("/"));
 
     // Check if source folder will be empty after move
-    const sourceWillBeEmpty = !selectedDrive.x.some(x => 
-      x.path !== selectedNode.path && // Not the current SVG
-      x.path.startsWith(sourceFolderPath + "/") // Is in the source folder
+    const sourceWillBeEmpty = !selectedDrive.x.some(
+      (x) =>
+        x.path !== selectedNode.path && // Not the current SVG
+        x.path.startsWith(sourceFolderPath + "/"), // Is in the source folder
     );
 
     // Update the drive with new path for the SVG
     const updatedDrive = {
       ...selectedDrive,
-      x: selectedDrive.x.map((x) => x.path === selectedNode.path ? { ...x, path: newPath } : x),
+      x: selectedDrive.x.map((x) =>
+        x.path === selectedNode.path ? { ...x, path: newPath } : x,
+      ),
       folders: [
         // Keep existing folders except target folder
-        ...selectedDrive.folders.filter(folder => folder !== targetFolderPath),
+        ...selectedDrive.folders.filter(
+          (folder) => folder !== targetFolderPath,
+        ),
         // Add source folder if it will be empty (no SVGs left in it)
-        ...(sourceWillBeEmpty ? [sourceFolderPath] : [])
-      ].sort((a, b) => a.localeCompare(b))
+        ...(sourceWillBeEmpty ? [sourceFolderPath] : []),
+      ].sort((a, b) => a.localeCompare(b)),
     };
 
-    await nostrService.updateDrive({ updatedDrive, selectedDrive, selectedServers, userWriteRelays, setDrives, setSelectedDrive });
+    await nostrService.updateDrive({
+      updatedDrive,
+      selectedDrive,
+      selectedServers,
+      userWriteRelays,
+      setDrives,
+      setSelectedDrive,
+    });
   } else if (selectedNode.type === "directory") {
     const updatedDrive = {
       ...selectedDrive,
@@ -432,7 +530,14 @@ export const onEditPath = async ({
       }),
     };
 
-    await nostrService.updateDrive({ updatedDrive, selectedDrive, selectedServers, userWriteRelays, setDrives, setSelectedDrive });
+    await nostrService.updateDrive({
+      updatedDrive,
+      selectedDrive,
+      selectedServers,
+      userWriteRelays,
+      setDrives,
+      setSelectedDrive,
+    });
   } else {
     assertUnreachable(selectedNode);
   }

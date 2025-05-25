@@ -35,7 +35,7 @@ export class BlossomService {
     sha256: string,
     servers: Server[],
     mime?: string,
-  ): Promise<{ blob: Blob, size: number, url: string, sha256: string }> {
+  ): Promise<{ blob: Blob; size: number; url: string; sha256: string }> {
     const getExtension = (mime?: string): string => {
       if (!mime) {
         return "";
@@ -44,6 +44,7 @@ export class BlossomService {
       if (mime.includes("svg")) {
         return ".svg";
       }
+
       return `.${mime.split("/")[1]}`;
     };
 
@@ -69,7 +70,9 @@ export class BlossomService {
       const contentType = result.headers.get("content-type");
 
       if (mime && contentType !== mime) {
-        throw new Error(`Invalid content type of ${contentType}, from ${result.url}`);
+        throw new Error(
+          `Invalid content type of ${contentType}, from ${result.url}`,
+        );
       }
 
       // verify sha256 hash of the blob
@@ -77,7 +80,7 @@ export class BlossomService {
         "SHA-256",
         await blob.arrayBuffer(),
       );
-      
+
       const hashString = Array.from(new Uint8Array(hash))
         .map((b) => b.toString(16).padStart(2, "0"))
         .join("");
@@ -85,8 +88,8 @@ export class BlossomService {
       const url = result.url;
 
       if (hashString === sha256) {
-        return { 
-          blob, 
+        return {
+          blob,
           size,
           url,
           sha256,
@@ -211,7 +214,7 @@ export class BlossomService {
       "SHA-256",
       await blob.arrayBuffer(),
     );
-    
+
     const sha256String = Array.from(new Uint8Array(sha256))
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
@@ -246,7 +249,7 @@ export class BlossomService {
     if (!window.nostr) {
       return null;
     }
-    
+
     const ONE_DAY_IN_SECONDS = 60 * 60 * 24;
 
     const sha256 = url.split("/").pop()?.split(".")[0];
@@ -306,7 +309,10 @@ export class BlossomService {
     );
   }
 
-  async mirrorFile(url: string, servers: string[]): Promise<PromiseSettledResult<BlobDescriptor>[]> {
+  async mirrorFile(
+    url: string,
+    servers: string[],
+  ): Promise<PromiseSettledResult<BlobDescriptor>[]> {
     const auth = await this.getBlossomAuthForMirrorUrls(url);
 
     return Promise.allSettled(

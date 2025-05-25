@@ -1,6 +1,7 @@
-import { h } from 'preact';
-import { useState, useRef } from 'preact/hooks';
-import { FileSource } from './types';
+import type { h } from "preact";
+import { useState, useRef } from "preact/hooks";
+
+import type { FileSource } from "./types";
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -15,16 +16,16 @@ export const UploadModal = ({
   onUpload,
   path,
 }: UploadModalProps) => {
-  const [url, setUrl] = useState('');
-  const [hash, setHash] = useState('');
-  const [name, setName] = useState('');
+  const [url, setUrl] = useState("");
+  const [hash, setHash] = useState("");
+  const [name, setName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
 
   const handleDrag = (e: h.JSX.TargetedDragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (e.type === "dragenter" || e.type === "dragover") {
       setDragActive(true);
     } else if (e.type === "dragleave") {
@@ -35,23 +36,23 @@ export const UploadModal = ({
   const handleDrop = (e: h.JSX.TargetedDragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     setDragActive(false);
-    
+
     const dt = e.dataTransfer;
     const file = dt?.files?.[0];
 
     if (file) {
-      onUpload({ type: 'file', file });
+      onUpload({ type: "file", file });
       onClose();
     }
   };
 
   const handleFileSelect = (e: h.JSX.TargetedEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
-    
+
     if (target.files && target.files[0]) {
-      onUpload({ type: 'file', file: target.files[0] });
+      onUpload({ type: "file", file: target.files[0] });
       onClose();
     }
   };
@@ -60,9 +61,9 @@ export const UploadModal = ({
     e.preventDefault();
 
     const trimmedUrl = url.trim();
-    
+
     if (trimmedUrl) {
-      onUpload({ type: 'url', url: trimmedUrl });
+      onUpload({ type: "url", url: trimmedUrl });
       onClose();
     }
   };
@@ -72,14 +73,16 @@ export const UploadModal = ({
 
     const trimmedHash = hash.trim();
     const trimmedName = name.trim();
-    
+
     if (trimmedHash && trimmedName) {
-      onUpload({ type: 'hash', hash: trimmedHash, name: trimmedName });
+      onUpload({ type: "hash", hash: trimmedHash, name: trimmedName });
       onClose();
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -93,7 +96,7 @@ export const UploadModal = ({
             ✕
           </button>
         </div>
-        
+
         <div className="space-y-6">
           {/* URL Input Section */}
           <div>
@@ -129,7 +132,7 @@ export const UploadModal = ({
               onClick={() => fileInputRef.current?.click()}
               className={`
                 border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
-                ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+                ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"}
               `}
             >
               <input
@@ -184,4 +187,4 @@ export const UploadModal = ({
       </div>
     </div>
   );
-}; 
+};

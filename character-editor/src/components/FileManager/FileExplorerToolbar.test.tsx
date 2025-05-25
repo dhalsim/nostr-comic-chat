@@ -1,9 +1,12 @@
-import { onEditPath, updateFolder, updatePath } from "./FileExplorerToolbar";
 import * as nostrServiceModule from "../../services/nostrService";
+
+import { onEditPath, updateFolder, updatePath } from "./FileExplorerToolbar";
 
 // Mock nostrService
 const mockUpdateDrive = jest.fn();
-jest.spyOn(nostrServiceModule.nostrService, 'updateDrive').mockImplementation(mockUpdateDrive);
+jest
+  .spyOn(nostrServiceModule.nostrService, "updateDrive")
+  .mockImplementation(mockUpdateDrive);
 
 describe("FileExplorerToolbar", () => {
   beforeEach(() => {
@@ -13,11 +16,7 @@ describe("FileExplorerToolbar", () => {
   describe("updateFolder", () => {
     it("should update the folder path", () => {
       const updatedFolders = updateFolder({
-        folders: [
-          "test",
-          "test/test2",
-          "test/test2/test3"
-        ],
+        folders: ["test", "test/test2", "test/test2/test3"],
         selectedNode: {
           name: "test",
           type: "directory",
@@ -38,10 +37,14 @@ describe("FileExplorerToolbar", () => {
             },
           ],
         },
-        newPath: "changed"
+        newPath: "changed",
       });
 
-      expect(updatedFolders).toEqual(["changed", "changed/test2", "changed/test2/test3"]);
+      expect(updatedFolders).toEqual([
+        "changed",
+        "changed/test2",
+        "changed/test2/test3",
+      ]);
     });
   });
 
@@ -90,7 +93,7 @@ describe("FileExplorerToolbar", () => {
             },
           ],
         },
-        newPath: "changed"
+        newPath: "changed",
       });
 
       expect(updatedPaths).toEqual([
@@ -120,17 +123,14 @@ describe("FileExplorerToolbar", () => {
         description: "test",
         emotions: [],
         name: "test",
-        folders: [
-          "/deneme",
-          "/deneme/deneme2",
-          "/deneme/deneme2/deneme3"
-        ],
+        folders: ["/deneme", "/deneme/deneme2", "/deneme/deneme2/deneme3"],
         x: [
           {
-            "sha256": "d03e4dafd9a7148e99f5a7d99b731f75ce6447d4e3a36422ea58fbb99649b89c",
-            "path": "/characters/char1/emotion-a.svg",
-            "size": 422,
-            "mime": "image/svg+xml"
+            sha256:
+              "d03e4dafd9a7148e99f5a7d99b731f75ce6447d4e3a36422ea58fbb99649b89c",
+            path: "/characters/char1/emotion-a.svg",
+            size: 422,
+            mime: "image/svg+xml",
           },
         ],
         servers: [],
@@ -142,7 +142,8 @@ describe("FileExplorerToolbar", () => {
           name: "test",
           type: "svg",
           path: "/characters/char1/emotion-a.svg",
-          sha256: "d03e4dafd9a7148e99f5a7d99b731f75ce6447d4e3a36422ea58fbb99649b89c",
+          sha256:
+            "d03e4dafd9a7148e99f5a7d99b731f75ce6447d4e3a36422ea58fbb99649b89c",
           mime: "image/svg+xml",
         },
         selectedDrive,
@@ -159,7 +160,8 @@ describe("FileExplorerToolbar", () => {
           x: [
             {
               path: "/deneme/emotion-a.svg",
-              sha256: "d03e4dafd9a7148e99f5a7d99b731f75ce6447d4e3a36422ea58fbb99649b89c",
+              sha256:
+                "d03e4dafd9a7148e99f5a7d99b731f75ce6447d4e3a36422ea58fbb99649b89c",
               size: 422,
               mime: "image/svg+xml",
             },
@@ -167,7 +169,7 @@ describe("FileExplorerToolbar", () => {
           folders: [
             "/characters/char1",
             "/deneme/deneme2",
-            "/deneme/deneme2/deneme3"
+            "/deneme/deneme2/deneme3",
           ],
         },
         selectedDrive,

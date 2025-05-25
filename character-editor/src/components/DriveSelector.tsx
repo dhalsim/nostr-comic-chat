@@ -10,7 +10,12 @@ interface DriveSelectorProps {
   onChange: (drive: BlossomDrive | null) => void;
 }
 
-export const DriveSelector = ({ value, drives, setDrives, onChange }: DriveSelectorProps) => {
+export const DriveSelector = ({
+  value,
+  drives,
+  setDrives,
+  onChange,
+}: DriveSelectorProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +57,9 @@ export const DriveSelector = ({ value, drives, setDrives, onChange }: DriveSelec
   }, []);
 
   if (isLoading) {
-    return <div className="p-4 text-sm text-gray-600 ml-2">Loading drives...</div>;
+    return (
+      <div className="p-4 text-sm text-gray-600 ml-2">Loading drives...</div>
+    );
   }
 
   if (error) {

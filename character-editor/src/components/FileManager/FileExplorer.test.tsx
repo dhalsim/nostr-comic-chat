@@ -12,19 +12,22 @@ describe("FileExplorer", () => {
         folders: ["characters/char2"],
         x: [
           {
-            sha256: "d03e4dafd9a7148e99f5a7d99b731f75ce6447d4e3a36422ea58fbb99649b89c",
+            sha256:
+              "d03e4dafd9a7148e99f5a7d99b731f75ce6447d4e3a36422ea58fbb99649b89c",
             path: "/characters/char1/emotion-a.svg",
             size: 422,
             mime: "image/svg+xml",
           },
           {
-            sha256: "884a2c6fbcc9620e762edf52de5b102c7878377e9576cb20d60c32cc9d27117c",
+            sha256:
+              "884a2c6fbcc9620e762edf52de5b102c7878377e9576cb20d60c32cc9d27117c",
             path: "/characters/char1/emotion-b.svg",
             size: 455,
             mime: "image/svg+xml",
           },
           {
-            sha256: "81c371cfd9d3917a279eb195feed559f0cbcb17207bcbf4a2a707447bd86733e",
+            sha256:
+              "81c371cfd9d3917a279eb195feed559f0cbcb17207bcbf4a2a707447bd86733e",
             path: "/characters/char1/profile.svg",
             size: 309,
             mime: "image/svg+xml",
@@ -37,7 +40,7 @@ describe("FileExplorer", () => {
           },
         ],
       });
-      
+
       expect(tree).toEqual([
         {
           name: "my-comic-characters",
@@ -58,19 +61,25 @@ describe("FileExplorer", () => {
                       name: "emotion-a.svg",
                       path: "/characters/char1/emotion-a.svg",
                       type: "svg",
-                      sha256: "d03e4dafd9a7148e99f5a7d99b731f75ce6447d4e3a36422ea58fbb99649b89c",
+                      mime: "image/svg+xml",
+                      sha256:
+                        "d03e4dafd9a7148e99f5a7d99b731f75ce6447d4e3a36422ea58fbb99649b89c",
                     },
                     {
                       name: "emotion-b.svg",
                       path: "/characters/char1/emotion-b.svg",
                       type: "svg",
-                      sha256: "884a2c6fbcc9620e762edf52de5b102c7878377e9576cb20d60c32cc9d27117c",
+                      mime: "image/svg+xml",
+                      sha256:
+                        "884a2c6fbcc9620e762edf52de5b102c7878377e9576cb20d60c32cc9d27117c",
                     },
                     {
                       name: "profile.svg",
                       path: "/characters/char1/profile.svg",
                       type: "svg",
-                      sha256: "81c371cfd9d3917a279eb195feed559f0cbcb17207bcbf4a2a707447bd86733e",
+                      mime: "image/svg+xml",
+                      sha256:
+                        "81c371cfd9d3917a279eb195feed559f0cbcb17207bcbf4a2a707447bd86733e",
                     },
                   ],
                 },

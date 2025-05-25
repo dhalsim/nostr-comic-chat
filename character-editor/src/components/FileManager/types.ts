@@ -21,4 +21,7 @@ export interface BlobResult {
   blob: Blob;
 }
 
-export type FileSource = { type: 'file', file: File } | { type: 'url', url: string } | { type: 'hash', hash: string, name: string };
+export type FileSource =
+  | { type: "file"; file: File }
+  | { type: "url"; url: string }
+  | { type: "hash"; hash: string; name: string };

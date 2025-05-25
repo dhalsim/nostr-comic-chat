@@ -1,16 +1,16 @@
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
 // Enable automatic mocking
 jest.useFakeTimers();
-jest.spyOn(global, 'setTimeout');
-jest.spyOn(global, 'clearTimeout');
-jest.spyOn(global, 'setInterval');
-jest.spyOn(global, 'clearInterval');
+jest.spyOn(global, "setTimeout");
+jest.spyOn(global, "clearTimeout");
+jest.spyOn(global, "setInterval");
+jest.spyOn(global, "clearInterval");
 
 // Mock TextDecoder and TextEncoder
 class MockTextDecoder {
   decode(input?: BufferSource): string {
-    return '';
+    return "";
   }
 }
 
@@ -30,6 +30,6 @@ window.nostr = {
 };
 
 // Make sure jest.mock is available in test files
-if (typeof jest === 'undefined') {
-  global.jest = require('@jest/globals').jest;
+if (typeof jest === "undefined") {
+  global.jest = require("@jest/globals").jest;
 }

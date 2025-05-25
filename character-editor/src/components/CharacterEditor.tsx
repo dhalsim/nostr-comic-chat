@@ -7,7 +7,6 @@ import { nostrService } from "../services/nostrService.ts";
 import type {
   BlossomDrive,
   Emotion,
-  RelayUrl,
   Server,
   ServerOption,
   UserRelay,
@@ -24,12 +23,14 @@ type SelectedAsset = {
   blob: Blob;
 };
 
-export type HandleAssetSelectParams = {
-  type: "Select";
-  path: string;
-  sha256: string;
-  blob: Blob;
-} | { type: "Clear", path: string; };
+export type HandleAssetSelectParams =
+  | {
+      type: "Select";
+      path: string;
+      sha256: string;
+      blob: Blob;
+    }
+  | { type: "Clear"; path: string };
 
 export const CharacterEditor = () => {
   const svgEditorRef = useRef<InstanceType<typeof Editor> | null>(null);
@@ -239,11 +240,15 @@ export const CharacterEditor = () => {
     if (params.type === "Select") {
       cb.style.display = "block";
       svgEditorRef.current.loadSvgString(await params.blob.text());
-      
-      setSelectedAsset({ path: params.path, sha256: params.sha256, blob: params.blob });
+
+      setSelectedAsset({
+        path: params.path,
+        sha256: params.sha256,
+        blob: params.blob,
+      });
     } else if (params.type === "Clear") {
       svgEditorRef.current.svgCanvas.clear();
-      cb.style.display = "none"
+      cb.style.display = "none";
 
       setSelectedAsset(null);
     } else {
@@ -299,7 +304,12 @@ export const CharacterEditor = () => {
       {/* Left Sidebar - File Explorer & Drive Selection */}
       <div className="w-64 h-full border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
-          <DriveSelector value={selectedDrive} drives={drives} setDrives={setDrives} onChange={setSelectedDrive} />
+          <DriveSelector
+            value={selectedDrive}
+            drives={drives}
+            setDrives={setDrives}
+            onChange={setSelectedDrive}
+          />
         </div>
         <div className="flex-1 overflow-y-auto">
           {selectedDrive && (
@@ -374,4 +384,3 @@ export const CharacterEditor = () => {
     </div>
   );
 };
-

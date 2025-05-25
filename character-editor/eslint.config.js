@@ -4,15 +4,17 @@ import prettier from "eslint-plugin-prettier";
 import tseslint from "typescript-eslint";
 
 export default [
+  {
+    ignores: [
+      "**/src/editor/**/*",
+      "**/src/wnj/**/*",
+      "**/src/setupTests.ts",
+    ],
+  },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    env: {
-      browser: true,
-      es2024: true,
-      node: true,
-    },
-    files: ["**/*.{js,ts,tsx}"],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

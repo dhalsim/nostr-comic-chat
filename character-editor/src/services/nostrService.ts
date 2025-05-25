@@ -1,4 +1,5 @@
-import { NostrEvent, SimplePool } from "nostr-tools";
+import type { NostrEvent } from "nostr-tools";
+import { SimplePool } from "nostr-tools";
 
 import {
   asRelayUrl,
@@ -41,7 +42,7 @@ type UpdateDriveParams = {
   userWriteRelays: RelayUrl[];
   setDrives: (drives: BlossomDrive[]) => void;
   setSelectedDrive: (drive: BlossomDrive) => void;
-}
+};
 
 export class NostrService {
   private pool: SimplePool;
@@ -214,13 +215,13 @@ export class NostrService {
     const driveMap = new Map<string, NostrEvent>();
     drives.forEach((drive) => {
       const d = drive.tags.find((tag) => tag[0] === "d")?.[1];
-      
+
       if (d) {
         if (!driveMap.has(d)) {
           driveMap.set(d, drive);
         } else {
           const existingDrive = driveMap.get(d);
-          
+
           if (existingDrive && existingDrive.created_at < drive.created_at) {
             driveMap.set(d, drive);
           }
@@ -370,20 +371,29 @@ export class NostrService {
     }
   }
 
-  async updateDrive({ updatedDrive, selectedDrive, selectedServers, userWriteRelays, setDrives, setSelectedDrive }: UpdateDriveParams) {
+  async updateDrive({
+    updatedDrive,
+    selectedDrive,
+    selectedServers,
+    userWriteRelays,
+    setDrives,
+    setSelectedDrive,
+  }: UpdateDriveParams) {
     // Publish the updated drive
     await nostrService.publishBlossomDrive(
       updatedDrive,
       selectedServers,
       userWriteRelays,
     );
-  
+
     const modifiedDrives = await nostrService.getBlossomDrives(userWriteRelays);
-  
+
     // Update the selected drive
     setDrives(modifiedDrives);
-    setSelectedDrive(modifiedDrives.find((drive) => drive.name === selectedDrive.name)!);
-  };
+    setSelectedDrive(
+      modifiedDrives.find((drive) => drive.name === selectedDrive.name)!,
+    );
+  }
 }
 
 export const nostrService = new NostrService();

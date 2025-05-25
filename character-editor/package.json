@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --fix --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --ext .ts,.tsx --fix --report-unused-disable-directives --max-warnings 0",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
