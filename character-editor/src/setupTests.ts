@@ -9,13 +9,13 @@ jest.spyOn(global, "clearInterval");
 
 // Mock TextDecoder and TextEncoder
 class MockTextDecoder {
-  decode(input?: BufferSource): string {
+  decode(): string {
     return "";
   }
 }
 
 class MockTextEncoder {
-  encode(input?: string): Uint8Array {
+  encode(): Uint8Array {
     return new Uint8Array();
   }
 }

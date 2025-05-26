@@ -27,7 +27,7 @@ A character consists of these SVG files:
 
 and so on
 
-The  **default emotion** as well.
+The **default emotion** as well.
 
 Emotions have specific keywords (or emojies) that are related to it. Chat clients can automatically show the emotion based on the chat text.
 
@@ -118,6 +118,26 @@ Emotions have specific keywords (or emojies) that are related to it. Chat client
     ],
   ],
   "content": "",
+  "sig": "6a3b99c86ee1b5d0568cbd2d529ed7a53fe0c470964faf0ace0668192c141200297f4c81b2fd3f242e2c6d680e39be193ef6f0a25070a70249dab6ce9e7ea99b"
+}
+```
+
+A sample message would look like:
+
+```json
+{
+  "id": "4e95a65fd81cfa59bbd8a0f8a751c8bcb2d3c2effe0e5edb7c946044c6ee8193",
+  "pubkey": "266815e0c9210dfa324c6cba3573b14bee49da4209a9456f9484e5106cd408a5",
+  "created_at": 1709031020,
+  "kind": 7353,
+  "tags": [
+    ["drive", "my-comic-characters"],
+    ["character", "/characters/char1"],
+    ["emotion", "emotian-a.svg"],
+    ["font", "/fonts/font-a/bold.woff2"],
+    ["color", "c1", "#76b5c5"],
+  ],
+  "content": "Hello dhalsim, <bold>welcome</bold> to <c1>chat</c1>",
   "sig": "6a3b99c86ee1b5d0568cbd2d529ed7a53fe0c470964faf0ace0668192c141200297f4c81b2fd3f242e2c6d680e39be193ef6f0a25070a70249dab6ce9e7ea99b"
 }
 ```

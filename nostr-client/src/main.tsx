@@ -1,5 +1,6 @@
-import { render } from 'preact';
-import { ChatRoom } from './components/ChatRoom';
-import './index.css';
+import { render } from "preact";
 
-render(<ChatRoom />, document.getElementById('app')!); 
+import { ChatInterface } from "./pages/ChatInterface";
+import "./index.css";
+
+render(<ChatInterface />, document.getElementById("app")!);
