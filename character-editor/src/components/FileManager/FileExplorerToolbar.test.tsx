@@ -1,4 +1,4 @@
-import * as nostrServiceModule from "../../services/nostrService";
+import * as nostrServiceModule from "@services/nostrService";
 
 import { onEditPath, updateFolder, updatePath } from "./FileExplorerToolbar";
 

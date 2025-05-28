@@ -1,8 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 
-import { nostrService } from "../services/nostrService";
-import type { Server, ServerOption, UserRelay } from "../services/types";
-import { asServer } from "../services/types";
+import { nostrService } from "@services/nostrService";
+import type { Server, ServerOption, UserRelay } from "@services/types";
+import { asServer } from "@services/types";
 
 export const BlossomServerManager = ({
   userRelayList,

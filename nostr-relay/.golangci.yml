@@ -1,0 +1,21 @@
+version: "2"
+linters:
+  enable:
+    - exhaustruct
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+  settings:
+    exhaustruct:
+      include:
+        - 'nostr-relay\/src\/main\..*'
+    # staticcheck:
+    #   dot-import-whitelist:
+    #     - github.com/julvo/htmlgo
+formatters:
+  exclusions:
+    generated: lax

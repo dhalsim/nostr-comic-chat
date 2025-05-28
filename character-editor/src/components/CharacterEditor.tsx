@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 
-import Editor from "../editor/Editor.js";
-import { assertUnreachable, isFulfilled, isRejected } from "../lib/utils.ts";
-import { blossomService } from "../services/blossomService.ts";
-import { nostrService } from "../services/nostrService.ts";
+import { assertUnreachable, isFulfilled, isRejected } from "@lib/utils";
+import { blossomService } from "@services/blossomService";
+import { nostrService } from "@services/nostrService";
 import type {
   BlossomDrive,
   Emotion,
   Server,
   ServerOption,
   UserRelay,
-} from "../services/types";
+} from "@services/types";
+
+import Editor from "../editor/Editor.js";
 import "../styles/svgedit.css";
 
 import { BlossomServerManager } from "./BlossomServerManager.tsx";

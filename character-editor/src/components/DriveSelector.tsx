@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 
-import { nostrService } from "../services/nostrService";
-import type { BlossomDrive } from "../services/types";
+import { nostrService } from "@services/nostrService";
+import type { BlossomDrive } from "@services/types";
 
 interface DriveSelectorProps {
   value: BlossomDrive | null;

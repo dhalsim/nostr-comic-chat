@@ -1,19 +1,10 @@
 import { useState } from "preact/hooks";
 
-import {
-  assertUnreachable,
-  findParentFolder,
-  getNodeByPath,
-} from "../../lib/utils";
-import { blossomService } from "../../services/blossomService";
-import type { BlobDescriptor } from "../../services/blossomService";
-import { nostrService } from "../../services/nostrService";
-import type {
-  BlossomDrive,
-  BlossomX,
-  RelayUrl,
-  Server,
-} from "../../services/types";
+import { assertUnreachable, findParentFolder, getNodeByPath } from "@lib/utils";
+import { blossomService } from "@services/blossomService";
+import type { BlobDescriptor } from "@services/blossomService";
+import { nostrService } from "@services/nostrService";
+import type { BlossomDrive, BlossomX, RelayUrl, Server } from "@services/types";
 
 import type { AssetNode, FileSource } from "./types";
 import { UploadModal } from "./UploadModal";

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 
-import { assertUnreachable, getNodeByPath } from "../../lib/utils";
-import { blossomService } from "../../services/blossomService";
-import type { BlossomDrive, RelayUrl, Emotion } from "../../services/types";
+import { assertUnreachable, getNodeByPath } from "@lib/utils";
+import { blossomService } from "@services/blossomService";
+import type { BlossomDrive, RelayUrl, Emotion } from "@services/types";
 
 import { type HandleAssetSelectParams } from "../CharacterEditor";
 
