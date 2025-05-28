@@ -1,6 +1,7 @@
 import type { NostrEvent } from "nostr-tools";
 import { SimplePool } from "nostr-tools";
 
+import { ChannelService } from "./channelService";
 import {
   asRelayUrl,
   asServer,
@@ -8,7 +9,6 @@ import {
   type ServerOption,
   type UserRelay,
 } from "./types";
-import { ChannelService } from "./channelService";
 
 export const DEFAULT_METADATA_QUERY_RELAYS = [
   "wss://purplepag.es",

@@ -13,22 +13,24 @@
   "dependencies": {
     "preact": "^10.19.6",
     "preact-router": "^4.1.2",
-    "nostr-tools": "^2.0.0",
-    "tailwindcss": "^3.4.1",
-    "postcss": "^8.4.35",
-    "autoprefixer": "^10.4.17",
-    "vite": "^5.1.0",
-    "@preact/preset-vite": "^2.8.1"
+    "nostr-tools": "^2.0.0"
   },
   "devDependencies": {
+    "@preact/preset-vite": "^2.8.1",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
+    "autoprefixer": "^10.4.17",
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
+    "eslint-import-resolver-typescript": "^4.4.1",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.4.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
-    "prettier-eslint": "^16.4.2"
+    "postcss": "^8.4.35",
+    "prettier-eslint": "^16.4.2",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
   }
 } 

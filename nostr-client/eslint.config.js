@@ -29,7 +29,25 @@ export default [
       prettier: prettier,
       import: importPlugin,
     },
+    settings: {
+      "import/resolver": {
+        typescript: true
+      },
+      "import/internal-regex": "^@(lib|services|components|hooks|types|pages)/",
+      "import/external-regex": "^(?!@(lib|services|components|hooks|types|pages)/)"
+    },
     rules: {
+      "import/order": [
+        "error",
+        {
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
+          "newlines-between": "always",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+        }
+      ],
       "padding-line-between-statements": [
         "error",
         {
@@ -64,40 +82,6 @@ export default [
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
-        },
-      ],
-      "import/order": [
-        "error",
-        {
-          groups: ["external", "internal"],
-          pathGroups: [
-            {
-              pattern: "../../../**",
-              group: "internal",
-              position: "before",
-            },
-            {
-              pattern: "../../**",
-              group: "internal",
-              position: "before",
-            },
-            {
-              pattern: "../**",
-              group: "internal",
-              position: "before",
-            },
-            {
-              pattern: "./**",
-              group: "internal",
-              position: "after",
-            },
-          ],
-          pathGroupsExcludedImportTypes: ["external"],
-          "newlines-between": "always",
-          alphabetize: {
-            order: "asc",
-            caseInsensitive: true,
-          },
         },
       ],
       "@typescript-eslint/no-explicit-any": "off",

@@ -4,7 +4,7 @@
   "description": "Nostr relay tests",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --runInBand --detectOpenHandles",
     "test:watch": "jest --watch"
   },
   "keywords": [],

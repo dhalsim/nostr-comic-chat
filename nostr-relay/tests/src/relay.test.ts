@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from '@jest/globals'
 import { SimplePool, finalizeEvent, EventTemplate } from 'nostr-tools'
 
 const RELAY_URL = 'ws://localhost:3334'
-const MESSAGE_KIND = 1
+const MESSAGE_KIND = 7353
 
 // Character keys
 const character1 = {
