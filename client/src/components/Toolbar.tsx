@@ -1,17 +1,22 @@
 import { useState } from "preact/hooks";
 
-import type { ChannelMetadata } from "../services/channelService";
+import type { ChannelMetadata } from "@services/channelService";
+import type { RelayUrl } from "@services/types";
 
 import { ChannelListModal } from "./ChannelListModal";
 
 export type ToolbarProps = {
-  channelList: Map<string, ChannelMetadata>;
-  userPublicJoinedChannelIds: string[];
+  pubkey: string;
+  userReadRelays: RelayUrl[];
+  openedChannels: ChannelMetadata[];
+  onAddOpened: (channel: ChannelMetadata) => void;
 };
 
 export const Toolbar = ({
-  channelList,
-  userPublicJoinedChannelIds,
+  pubkey,
+  userReadRelays,
+  openedChannels,
+  onAddOpened,
 }: ToolbarProps) => {
   const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
 
@@ -26,9 +31,11 @@ export const Toolbar = ({
 
       {isChannelModalOpen && (
         <ChannelListModal
-          userPublicJoinedChannelIds={userPublicJoinedChannelIds}
+          pubkey={pubkey}
+          userReadRelays={userReadRelays}
           onClose={() => setIsChannelModalOpen(false)}
-          channelList={channelList}
+          openedChannels={openedChannels}
+          onAddOpened={onAddOpened}
         />
       )}
     </div>

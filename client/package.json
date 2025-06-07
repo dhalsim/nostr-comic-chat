@@ -11,12 +11,14 @@
     "format": "prettier-eslint --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
+    "nostr-tools": "^2.0.0",
     "preact": "^10.19.6",
     "preact-router": "^4.1.2",
-    "nostr-tools": "^2.0.0"
+    "ramda": "^0.30.1"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.8.1",
+    "@types/ramda": "^0.30.2",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
     "autoprefixer": "^10.4.17",
@@ -33,4 +35,4 @@
     "typescript": "^5.8.3",
     "vite": "^6.3.5"
   }
-} 
+}
