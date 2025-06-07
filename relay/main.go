@@ -83,7 +83,13 @@ func main() {
 	relay.DeleteEvent = append(relay.DeleteEvent, db.DeleteEvent)
 	relay.ReplaceEvent = append(relay.ReplaceEvent, db.ReplaceEvent)
 
-	relay.RejectEvent = append(relay.RejectEvent, kinds.ValidateCreateChannel)
+	relay.RejectEvent = append(
+		relay.RejectEvent,
+		kinds.ValidateCreateChannel,
+		func(ctx context.Context, event *nostr.Event) (bool, string) {
+			return kinds.ValidateUpdateChannel(ctx, &db, event)
+		},
+	)
 
 	fmt.Println("Nostr Comic Chat Relay running on :3334")
 	if err := http.ListenAndServe(":3334", relay); err != nil {
