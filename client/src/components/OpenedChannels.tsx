@@ -6,8 +6,8 @@ import type {
   ChannelMetadata,
 } from "@services/channelService";
 import {
-  fetchPinnedChannels,
   fetchChannelMetadata,
+  fetchPinnedChannels,
   updatePinnedChannels,
 } from "@services/channelService";
 import type { RelayUrl } from "@services/types";
@@ -38,7 +38,7 @@ export const OpenedChannels = ({
     setIsLoading(true);
 
     const params = {
-      userReadRelays,
+      userWriteRelays,
       pubkey,
     };
 
@@ -54,7 +54,13 @@ export const OpenedChannels = ({
       const metadataResult = await getOrAddCache(
         { type: "metadata", userReadRelays },
         addHours(1),
-        () => fetchChannelMetadata({ userReadRelays }),
+        () =>
+          fetchChannelMetadata({
+            fetchRelays: Array.from(
+              new Set([...userReadRelays, ...userWriteRelays]),
+            ),
+            userPubkey: pubkey,
+          }),
       );
 
       // Combine and filter only pinned channels
@@ -86,9 +92,9 @@ export const OpenedChannels = ({
   ) => {
     try {
       const { data: currentPinned } = await getOrAddCache(
-        { type: "pinned", userReadRelays, pubkey },
+        { type: "pinned", userWriteRelays, pubkey },
         addHours(1),
-        () => fetchPinnedChannels({ userReadRelays, pubkey }),
+        () => fetchPinnedChannels({ userWriteRelays, pubkey }),
       );
 
       let updatedPinned: string[];

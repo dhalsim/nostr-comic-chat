@@ -12,8 +12,11 @@ import {
 } from "@services/channelService";
 import type { RelayUrl } from "@services/types";
 
+import { CreateUpdateChannelModal } from "./CreateUpdateChannelModal";
+
 interface ChannelListModalProps {
   userReadRelays: RelayUrl[];
+  userWriteRelays: RelayUrl[];
   pubkey: string;
   onClose: () => void;
   openedChannels: ChannelMetadata[];
@@ -22,6 +25,7 @@ interface ChannelListModalProps {
 
 export const ChannelListModal = ({
   userReadRelays,
+  userWriteRelays,
   pubkey,
   onClose,
   openedChannels,
@@ -36,20 +40,29 @@ export const ChannelListModal = ({
   );
   const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
   const [isFromCache, setIsFromCache] = useState<boolean>(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showMyChannels, setShowMyChannels] = useState(false);
+  const [channelToUpdate, setChannelToUpdate] =
+    useState<ChannelMetadata | null>(null);
 
   const fetch = async (forceRefresh: boolean = false) => {
     setIsFetchingChannels(true);
 
     const params = {
-      userReadRelays,
+      userWriteRelays,
       pubkey,
+    };
+
+    const metadataParams = {
+      fetchRelays: Array.from(new Set([...userReadRelays, ...userWriteRelays])),
+      userPubkey: pubkey,
     };
 
     try {
       // Clear caches if this is a force refresh
       if (forceRefresh) {
         clearCache({ type: "pinned", ...params });
-        clearCache({ type: "metadata", userReadRelays });
+        clearCache({ type: "metadata", ...metadataParams });
       }
 
       // Cache pinned channels separately
@@ -61,9 +74,9 @@ export const ChannelListModal = ({
 
       // Cache channel metadata separately
       const metadataResult = await getOrAddCache(
-        { type: "metadata", userReadRelays },
+        { type: "metadata", ...metadataParams },
         addHours(1),
-        () => fetchChannelMetadata({ userReadRelays }),
+        () => fetchChannelMetadata(metadataParams),
       );
 
       // Combine the results
@@ -98,11 +111,16 @@ export const ChannelListModal = ({
     if (filterComicRooms) {
       filtered = filtered.filter((elem) => {
         const hasTags = elem.channel.tags?.some(
-          (tag) => tag[0] === "comic-chat",
+          (tag) => tag[0] === "t" && tag[1] === "comic-chat",
         );
 
         return hasTags;
       });
+    }
+
+    // Apply my channels filter
+    if (showMyChannels) {
+      filtered = filtered.filter((elem) => elem.channel.isUserCreated);
     }
 
     // Apply search query filter
@@ -121,7 +139,7 @@ export const ChannelListModal = ({
     }
 
     setFilteredChannels(filtered);
-  }, [channels, filterComicRooms, searchQuery]);
+  }, [channels, filterComicRooms, searchQuery, showMyChannels]);
 
   const handleOpenChannel = (channel: ChannelMetadata) => {
     // Add to opened channels list
@@ -132,22 +150,57 @@ export const ChannelListModal = ({
     fetch(true); // Force refresh
   };
 
+  const handleChannelCreated = async (channelId: string) => {
+    // Force refresh to get the new channel
+    await fetch(true);
+    // Optionally auto-open the created channel
+    const createdChannel = channels.find((c) => c.channel.id === channelId);
+    if (createdChannel) {
+      onAddOpened(createdChannel.channel);
+    }
+  };
+
+  const handleUpdateChannel = (channel: ChannelMetadata) => {
+    setChannelToUpdate(channel);
+  };
+
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setChannelToUpdate(null);
+  };
+
   const ChannelItem = ({ channel, pinned }: ChannelWithPinned) => {
     const isOpened = openedChannels.some((c) => c.id === channel.id);
 
     return (
-      <button
+      <div
         key={channel.id}
-        onClick={() => handleOpenChannel(channel)}
         className={`w-full text-left p-3 border rounded transition-colors ${
-          isOpened
-            ? "bg-green-50 border-green-200 hover:bg-green-100"
-            : "hover:bg-gray-50"
+          isOpened ? "bg-green-50 border-green-200" : "hover:bg-gray-50"
         }`}
       >
         <div className="flex items-center gap-2 mb-1">
-          <div className="font-medium">{channel.name}</div>
+          <button
+            onClick={() => handleOpenChannel(channel)}
+            className="font-medium hover:text-blue-600 flex-1 text-left"
+          >
+            {channel.name}
+          </button>
           {pinned && <span className="text-xs text-blue-500">📌 Pinned</span>}
+          {channel.isUserCreated && (
+            <>
+              <span className="text-xs text-purple-600">👤 Mine</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdateChannel(channel);
+                }}
+                className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors"
+              >
+                Update
+              </button>
+            </>
+          )}
           {isOpened && <span className="text-xs text-green-600">✓ Opened</span>}
         </div>
         {channel.about && (
@@ -165,7 +218,7 @@ export const ChannelListModal = ({
             ))}
           </div>
         )}
-      </button>
+      </div>
     );
   };
 
@@ -186,6 +239,12 @@ export const ChannelListModal = ({
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold">Channels</h2>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+            >
+              + Create
+            </button>
             {isFetchingChannels && (
               <svg
                 className="animate-spin h-5 w-5 text-blue-500"
@@ -259,7 +318,7 @@ export const ChannelListModal = ({
           </div>
         )}
 
-        <div className="mb-2">
+        <div className="mb-4 space-y-2">
           <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -270,6 +329,18 @@ export const ChannelListModal = ({
               className="mr-2"
             />
             <span>Filter Comic Chat Rooms</span>
+          </label>
+
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showMyChannels}
+              onChange={(e: JSX.TargetedEvent<HTMLInputElement>) => {
+                setShowMyChannels(e.currentTarget.checked);
+              }}
+              className="mr-2"
+            />
+            <span>Show My Channels Only</span>
           </label>
         </div>
 
@@ -298,6 +369,16 @@ export const ChannelListModal = ({
           )}
         </div>
       </div>
+
+      {(showCreateModal || channelToUpdate) && (
+        <CreateUpdateChannelModal
+          userWriteRelays={userWriteRelays}
+          pubkey={pubkey}
+          onClose={handleCloseModal}
+          onChannelCreated={handleChannelCreated}
+          channelToUpdate={channelToUpdate || undefined}
+        />
+      )}
     </div>
   );
 };

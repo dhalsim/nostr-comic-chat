@@ -2,12 +2,14 @@ interface CacheEntry<T> {
   data: T;
   expiresAt: number;
   createdAt: number;
+  params: any;
 }
 
 interface CacheResult<T> {
   data: T;
   createdAt: Date;
   fromCache: boolean;
+  params: any;
 }
 
 /**
@@ -57,6 +59,7 @@ export const getOrAddCache = async <T>(
           data: parsed.data,
           createdAt: new Date(parsed.createdAt),
           fromCache: true,
+          params,
         };
       } else {
         console.log(`Cache expired for key: ${cacheKey}`);
@@ -81,6 +84,7 @@ export const getOrAddCache = async <T>(
     data,
     expiresAt: expiresAt.getTime(),
     createdAt,
+    params,
   };
 
   try {
@@ -98,6 +102,7 @@ export const getOrAddCache = async <T>(
     data,
     createdAt: new Date(createdAt),
     fromCache: false,
+    params,
   };
 };
 

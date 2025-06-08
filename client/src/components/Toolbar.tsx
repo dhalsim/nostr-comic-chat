@@ -8,6 +8,7 @@ import { ChannelListModal } from "./ChannelListModal";
 export type ToolbarProps = {
   pubkey: string;
   userReadRelays: RelayUrl[];
+  userWriteRelays: RelayUrl[];
   openedChannels: ChannelMetadata[];
   onAddOpened: (channel: ChannelMetadata) => void;
 };
@@ -15,6 +16,7 @@ export type ToolbarProps = {
 export const Toolbar = ({
   pubkey,
   userReadRelays,
+  userWriteRelays,
   openedChannels,
   onAddOpened,
 }: ToolbarProps) => {
@@ -33,6 +35,7 @@ export const Toolbar = ({
         <ChannelListModal
           pubkey={pubkey}
           userReadRelays={userReadRelays}
+          userWriteRelays={userWriteRelays}
           onClose={() => setIsChannelModalOpen(false)}
           openedChannels={openedChannels}
           onAddOpened={onAddOpened}

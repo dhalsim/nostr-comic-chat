@@ -41,23 +41,7 @@ export function ChatInterface() {
       const userReadRelays = userRelays.filter((relay) => relay.read);
       const userWriteRelays = userRelays.filter((relay) => relay.write);
 
-      // Add localhost relay to userReadRelays
-      const updatedReadRelays = [...userReadRelays];
-
-      // Add localhost relay if not already in the list
-      if (
-        !updatedReadRelays.some(
-          (relay) => relay.url.toString() === "ws://localhost:3334",
-        )
-      ) {
-        updatedReadRelays.push({
-          url: "ws://localhost:3334" as any, // Cast to avoid type error
-          read: true,
-          write: false,
-        });
-      }
-
-      setUserReadRelays(updatedReadRelays);
+      setUserReadRelays(userReadRelays);
       setUserWriteRelays(userWriteRelays);
     };
 
@@ -104,6 +88,7 @@ export function ChatInterface() {
         <Toolbar
           pubkey={pubkey}
           userReadRelays={userReadRelays.map((relay) => relay.url)}
+          userWriteRelays={userWriteRelays.map((relay) => relay.url)}
           openedChannels={openedChannels}
           onAddOpened={(channel: ChannelMetadata) => {
             // Add to opened list if not already there

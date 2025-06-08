@@ -44,6 +44,16 @@ export const signEvent = async (
 export const getUserRelayList = async (
   pubkey: string,
 ): Promise<UserRelay[]> => {
+  if (import.meta.env.MODE === "LocalRelay") {
+    return [
+      {
+        url: asRelayUrl("ws://localhost:3334"),
+        read: true,
+        write: true,
+      },
+    ];
+  }
+
   const nip65 = await pool.get(DEFAULT_RELAYLIST_RELAYS, {
     authors: [pubkey],
     kinds: [10002],

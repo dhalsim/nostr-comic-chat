@@ -1,5 +1,7 @@
 import type { NostrEvent } from "nostr-tools";
 
+import packageJson from "../../package.json";
+
 import { pool, signEvent } from "./nostrService";
 import type { RelayUrl } from "./types";
 
@@ -16,8 +18,9 @@ export type ChannelMetadata = {
   relays: RelayUrl[];
   owner: string;
   created_at: number;
-  tags?: string[][];
+  tags: string[][];
   updated_at?: number;
+  isUserCreated?: boolean;
 };
 
 export type ChannelWithPinned = {
@@ -26,7 +29,7 @@ export type ChannelWithPinned = {
 };
 
 type FetchPinnedChannelsParams = {
-  userReadRelays: RelayUrl[];
+  userWriteRelays: RelayUrl[];
   pubkey: string;
 };
 
@@ -34,11 +37,11 @@ type FetchPinnedChannelsParams = {
  * Fetches the user's pinned channel list (kind 10005)
  */
 export const fetchPinnedChannels = async ({
-  userReadRelays,
+  userWriteRelays,
   pubkey,
 }: FetchPinnedChannelsParams): Promise<string[]> => {
   const joinedEvents = await pool.querySync(
-    userReadRelays,
+    userWriteRelays,
     { kinds: [10005], authors: [pubkey] },
     { maxWait: 1000 },
   );
@@ -58,21 +61,23 @@ export const fetchPinnedChannels = async ({
 };
 
 type FetchChannelsParams = {
-  userReadRelays: RelayUrl[];
+  fetchRelays: RelayUrl[];
+  userPubkey: string;
 };
 
 /**
  * Fetches all channel metadata (kinds 40, 41)
  */
 export const fetchChannelMetadata = async ({
-  userReadRelays,
+  fetchRelays,
+  userPubkey,
 }: FetchChannelsParams): Promise<ChannelMetadata[]> => {
   const eventMap = new Map<string, FetchChannelResult>();
   const channels: ChannelMetadata[] = [];
 
   return new Promise<ChannelMetadata[]>((resolve, reject) => {
     const sub = pool.subscribe(
-      userReadRelays,
+      fetchRelays,
       { kinds: [40, 41] },
       {
         onevent: (event) => {
@@ -83,7 +88,7 @@ export const fetchChannelMetadata = async ({
               const eventData = { create: event };
               eventMap.set(event.id, eventData);
 
-              const channel = parseChannelEvent(event);
+              const channel = parseChannelEvent(event, userPubkey);
               if (channel) {
                 channels.push(channel);
               }
@@ -91,7 +96,7 @@ export const fetchChannelMetadata = async ({
               const eventData = { create: event, update: e.update };
               eventMap.set(event.id, eventData);
 
-              const channel = parseChannelEvent(event, e.update);
+              const channel = parseChannelEvent(event, userPubkey, e.update);
               if (channel) {
                 // Replace existing channel
                 const index = channels.findIndex((c) => c.id === channel.id);
@@ -115,7 +120,7 @@ export const fetchChannelMetadata = async ({
               const eventData = { create: e.create, update: event };
               eventMap.set(eId, eventData);
 
-              const channel = parseChannelEvent(e.create, event);
+              const channel = parseChannelEvent(e.create, userPubkey, event);
               if (channel) {
                 // Replace existing channel
                 const index = channels.findIndex((c) => c.id === channel.id);
@@ -177,6 +182,7 @@ export const updatePinnedChannels = async (
 
 export const parseChannelEvent = (
   create: NostrEvent,
+  userPubkey: string,
   update?: NostrEvent,
 ): ChannelMetadata | null => {
   try {
@@ -194,8 +200,9 @@ export const parseChannelEvent = (
       relays: Array.from(content.relays || []) || [],
       owner: create.pubkey,
       created_at: create.created_at,
-      tags: update?.tags,
+      tags: (update || create).tags,
       updated_at: update?.created_at,
+      isUserCreated: create.pubkey === userPubkey,
     };
   } catch (error) {
     if (update) {
@@ -212,4 +219,94 @@ export const parseChannelEvent = (
 
     return null;
   }
+};
+
+type CreateChannelParams = {
+  userWriteRelays: RelayUrl[];
+  pubkey: string;
+  name: string;
+  about: string;
+  picture?: string;
+  relays?: RelayUrl[];
+};
+
+/**
+ * Creates a new channel (kind 40)
+ */
+export const createChannel = async (
+  params: CreateChannelParams,
+): Promise<string> => {
+  console.log("Creating channel:", params.name);
+
+  const content = {
+    name: params.name,
+    about: params.about,
+    picture: params.picture || "",
+    relays: params.relays || [],
+  };
+
+  const event = {
+    kind: 40,
+    pubkey: params.pubkey,
+    tags: [["t", "comic-chat", `v${packageJson.version}`]],
+    created_at: Math.floor(Date.now() / 1000),
+    content: JSON.stringify(content),
+  };
+
+  const signedEvent = await signEvent(event);
+
+  if (!signedEvent) {
+    throw new Error("Failed to sign event");
+  }
+
+  pool.publish(params.userWriteRelays, signedEvent);
+
+  return signedEvent.id;
+};
+
+type UpdateChannelParams = {
+  userWriteRelays: RelayUrl[];
+  pubkey: string;
+  channelId: string;
+  name: string;
+  about: string;
+  picture?: string;
+  relays?: RelayUrl[];
+};
+
+/**
+ * Updates an existing channel (kind 41)
+ */
+export const updateChannel = async (
+  params: UpdateChannelParams,
+): Promise<string> => {
+  console.log("Updating channel:", params.channelId, params.name);
+
+  const content = {
+    name: params.name,
+    about: params.about,
+    picture: params.picture || "",
+    relays: params.relays || [],
+  };
+
+  const event = {
+    kind: 41,
+    pubkey: params.pubkey,
+    tags: [
+      ["e", params.channelId],
+      ["t", "comic-chat", `v${packageJson.version}`],
+    ],
+    created_at: Math.floor(Date.now() / 1000),
+    content: JSON.stringify(content),
+  };
+
+  const signedEvent = await signEvent(event);
+
+  if (!signedEvent) {
+    throw new Error("Failed to sign event");
+  }
+
+  pool.publish(params.userWriteRelays, signedEvent);
+
+  return signedEvent.id;
 };
